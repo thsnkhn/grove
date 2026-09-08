@@ -71,7 +71,7 @@ a {
   min-width: 0;
   min-height: 378px;
   flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
   padding: 20px 0;
 }
 
@@ -84,7 +84,7 @@ h1 {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   color: var(--ink);
   font-size: 24px;
   font-weight: 600;
@@ -104,6 +104,7 @@ h1 {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  margin-top: 8px;
   animation: page-enter 260ms var(--ease-out) 110ms both;
 }
 
@@ -118,7 +119,7 @@ h1 {
 
 .description {
   max-width: 400px;
-  margin-top: 16px;
+  margin-top: 8px;
   color: var(--body-ink);
   font-size: 22px;
   font-weight: 600;
