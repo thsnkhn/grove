@@ -109,6 +109,24 @@ For a release build, use `Grove.app/Contents/MacOS/Grove`. `Package.swift` remai
 
 The menu bar app owns the local MCP process lifecycle. Each `--mcp` process registers with Grove. Quitting Grove sends those processes a termination signal and removes their leases.
 
+## Agent skill
+
+Grove includes a portable [agent skill](skills/grove/SKILL.md) with its date,
+recurrence, identifier, and mutation rules. Until clients provide a standard
+consent-based installer, install it through the agent client's normal skill flow.
+
+MCP clients do not currently share a macOS-wide discovery or configuration
+standard. Grove will use explicit, client-specific setup instead of editing agent
+configuration without permission. For Codex, the supported registration command
+is:
+
+```sh
+codex mcp add grove -- /Applications/Grove.app/Contents/MacOS/Grove --mcp
+```
+
+The planned first-launch setup will ask before installing the skill or running a
+client registration command.
+
 ## Date and scheduling rules
 
 - Use `YYYY-MM-DD` for date-only values.
