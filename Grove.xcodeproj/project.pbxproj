@@ -5,6 +5,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		A10000000000000000000101 /* Grove.icon in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000021 /* Grove.icon */; };
 		A10000000000000000000090 /* GroveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000010 /* GroveApp.swift */; };
 		A10000000000000000000091 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000011 /* Models.swift */; };
 		A10000000000000000000092 /* EventKitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000012 /* EventKitStore.swift */; };
@@ -16,9 +17,12 @@
 		A10000000000000000000098 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000081 /* MCP */; };
 		A10000000000000000000099 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000083 /* Sparkle */; };
 		A10000000000000000000100 /* GroveUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000019 /* GroveUpdater.swift */; };
+		A10000000000000000000102 /* GroveMCPHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000022 /* GroveMCPHTTPServer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		A10000000000000000000021 /* Grove.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = Grove.icon; sourceTree = "<group>"; };
+		A10000000000000000000022 /* GroveMCPHTTPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveMCPHTTPServer.swift; sourceTree = "<group>"; };
 		A10000000000000000000010 /* GroveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveApp.swift; sourceTree = "<group>"; };
 		A10000000000000000000011 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
 		A10000000000000000000012 /* EventKitStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitStore.swift; sourceTree = "<group>"; };
@@ -66,6 +70,8 @@
 				A10000000000000000000017 /* GroveMenuView.swift */,
 				A10000000000000000000018 /* GroveProcessRegistry.swift */,
 				A10000000000000000000019 /* GroveUpdater.swift */,
+				A10000000000000000000022 /* GroveMCPHTTPServer.swift */,
+				A10000000000000000000021 /* Grove.icon */,
 			);
 			path = Grove;
 			sourceTree = "<group>";
@@ -142,6 +148,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				A10000000000000000000101 /* Grove.icon in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -164,6 +171,7 @@
 				A10000000000000000000096 /* GroveMenuView.swift in Sources */,
 				A10000000000000000000097 /* GroveProcessRegistry.swift in Sources */,
 				A10000000000000000000100 /* GroveUpdater.swift in Sources */,
+				A10000000000000000000102 /* GroveMCPHTTPServer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -193,6 +201,7 @@
 		A10000000000000000000072 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "Grove.icon";
 				CODE_SIGNING_ALLOWED = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				GENERATE_INFOPLIST_FILE = NO;
@@ -213,6 +222,7 @@
 		A10000000000000000000073 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = "Grove.icon";
 				CODE_SIGNING_ALLOWED = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";

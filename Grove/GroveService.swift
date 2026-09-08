@@ -55,11 +55,11 @@ enum GroveService: String, CaseIterable, Hashable, Identifiable, Sendable {
     }
 }
 
-@MainActor
 enum GrovePreferences {
     static let suiteName = "com.thsnkhn.grove.settings"
 
-    private static let defaults = UserDefaults(suiteName: suiteName) ?? .standard
+    // UserDefaults synchronizes its own reads and writes across processes.
+    nonisolated(unsafe) private static let defaults = UserDefaults(suiteName: suiteName) ?? .standard
 
     static func isEnabled(_ service: GroveService) -> Bool {
         defaults.object(forKey: service.preferenceKey) != nil &&
@@ -67,10 +67,19 @@ enum GrovePreferences {
     }
 
     static func setEnabled(_ enabled: Bool, for service: GroveService) {
+        guard isEnabled(service) != enabled else { return }
         defaults.set(enabled, forKey: service.preferenceKey)
+        DistributedNotificationCenter.default.post(
+            name: .groveServicesDidChange,
+            object: suiteName
+        )
     }
 
     static func enabledServices() -> Set<GroveService> {
         Set(GroveService.allCases.filter(isEnabled))
     }
+}
+
+extension Notification.Name {
+    static let groveServicesDidChange = Notification.Name("GroveServicesDidChange")
 }

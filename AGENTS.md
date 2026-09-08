@@ -10,7 +10,8 @@ Grove is a native macOS menu bar app and local MCP server.
 - Swift, SwiftUI, AppKit, EventKit, and Swift Package Manager.
 - macOS 14 or later.
 - Calendar and Reminders are the current integrations.
-- MCP uses stdio. There is no network listener.
+- MCP uses a localhost HTTP endpoint when the app runs. `--mcp` remains a
+  stdio fallback for clients that launch the executable.
 - The app has no database and does not keep a second copy of Apple data.
 
 Keep new work local, native, and small. Do not add cloud services, accounts,
@@ -60,7 +61,17 @@ Do not run broad builds or tests for a documentation-only change.
 
 ## MCP registration
 
-Grove starts its MCP server from the app executable:
+When Grove starts, it starts the local MCP endpoint:
+
+```text
+http://127.0.0.1:52718/mcp
+```
+
+The endpoint listens on loopback only. It does not expose Grove to the local
+network or the internet.
+
+Clients that support local HTTP MCP can use that URL. Grove also supports the
+stdio command:
 
 ```text
 Grove.app/Contents/MacOS/Grove --mcp
@@ -71,12 +82,19 @@ Before starting an MCP client:
 1. Open Grove.
 2. Enable Calendar or Reminders in the menu bar panel.
 3. Grant the requested macOS permissions.
-4. Add Grove to the MCP client.
+4. Add the local HTTP endpoint or the stdio command to the MCP client.
 
-The enabled service set is read when the MCP process starts. Restart the MCP
-client after changing service toggles.
+The menu bar selection controls the active tool list. Grove reads the current
+selection for every request and sends `notifications/tools/list_changed` when
+the selection changes. Existing clients do not need a server restart.
 
 ### Codex
+
+For the app-owned local HTTP server:
+
+```sh
+codex mcp add grove --url http://127.0.0.1:52718/mcp
+```
 
 For a release app:
 
@@ -142,11 +160,14 @@ client. It must show what it will change and allow the user to decline.
 
 The same executable has two modes:
 
-- Menu bar mode: `MenuBarExtra` shows service toggles and app controls.
-- Headless mode: `--mcp` starts the stdio MCP server.
+- Menu bar mode: `MenuBarExtra` shows service toggles, app controls, and starts
+  the loopback MCP server.
+- Headless mode: `--mcp` starts the stdio MCP server for clients that need a
+  command.
 
-The menu bar app owns active MCP process leases. Quitting Grove terminates those
-processes. `GroveSettings` stores service choices and manages the login item.
+The menu bar app owns the loopback listener and active stdio process leases.
+Quitting Grove stops the listener and terminates those processes.
+`GroveSettings` stores service choices and manages the login item.
 `EventKitStore` owns Calendar and Reminders access. `MCPServer` exposes only the
 enabled service tools.
 

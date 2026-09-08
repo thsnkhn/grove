@@ -14,16 +14,21 @@ enum GroveLaunchMode {
 
 @MainActor
 final class GroveAppDelegate: NSObject, NSApplicationDelegate {
+    private var mcpHTTPServer: GroveMCPHTTPServer?
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         if GroveLaunchMode.isHeadless {
             NSApp.setActivationPolicy(.prohibited)
             Task { await runHeadlessCommand() }
         } else {
             NSApp.setActivationPolicy(.accessory)
+            mcpHTTPServer = GroveMCPHTTPServer()
+            mcpHTTPServer?.start()
         }
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        mcpHTTPServer?.stop()
         GroveProcessRegistry.terminateServers()
         return .terminateNow
     }
@@ -33,8 +38,7 @@ final class GroveAppDelegate: NSObject, NSApplicationDelegate {
             switch GroveLaunchMode.argument {
             case "--mcp":
                 let store = EventKitStore()
-                let services = GrovePreferences.enabledServices()
-                try await GroveServer(store: store, enabledServices: services).run()
+                try await GroveServer(store: store).run()
             case "authorize":
                 print(try await EventKitStore().authorize())
             case "doctor":

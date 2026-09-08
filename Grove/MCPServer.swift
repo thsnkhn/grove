@@ -3,14 +3,12 @@ import MCP
 
 struct GroveServer {
     let store: EventKitStore
-    let enabledServices: Set<GroveService>
 
-    init(store: EventKitStore, enabledServices: Set<GroveService>) {
+    init(store: EventKitStore) {
         self.store = store
-        self.enabledServices = enabledServices
     }
 
-    func run() async throws {
+    func run(transport: any Transport = StdioTransport()) async throws {
         let lease = try GroveProcessLease()
         defer { _ = lease }
 
@@ -18,15 +16,16 @@ struct GroveServer {
             name: "grove",
             version: Grove.version,
             title: "Grove",
-            capabilities: .init(tools: .init())
+            capabilities: .init(tools: .init(listChanged: true))
         )
 
         await server.withMethodHandler(ListTools.self) { _ in
-            ListTools.Result(tools: ToolCatalog.tools(for: enabledServices))
+            ListTools.Result(tools: ToolCatalog.tools(for: GrovePreferences.enabledServices()))
         }
 
-        await server.withMethodHandler(CallTool.self) { [store, enabledServices] (params: CallTool.Parameters) in
+        await server.withMethodHandler(CallTool.self) { [store] (params: CallTool.Parameters) in
             do {
+                let enabledServices = GrovePreferences.enabledServices()
                 guard let service = ToolCatalog.service(for: params.name), enabledServices.contains(service) else {
                     throw GroveError.serviceDisabled("The `\(params.name)` tool is disabled in Grove.")
                 }
@@ -46,7 +45,17 @@ struct GroveServer {
             }
         }
 
-        let transport = StdioTransport()
+        let changes = DistributedNotificationCenter.default.addObserver(
+            forName: .groveServicesDidChange,
+            object: GrovePreferences.suiteName,
+            queue: nil
+        ) { _ in
+            Task {
+                try? await server.notify(ToolListChangedNotification.message())
+            }
+        }
+        defer { DistributedNotificationCenter.default.removeObserver(changes) }
+
         try await server.start(transport: transport)
         await server.waitUntilCompleted()
     }

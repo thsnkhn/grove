@@ -20,7 +20,7 @@ let package = Package(
                 .product(name: "MCP", package: "swift-sdk")
             ],
             path: "Grove",
-            exclude: ["Info.plist"],
+            exclude: ["Info.plist", "Grove.icon"],
             linkerSettings: [
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate",

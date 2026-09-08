@@ -24,4 +24,8 @@ func exposesTheLeanInitialToolSurface() {
     #expect(ToolCatalog.tools.count == 12)
     #expect(ToolCatalog.tools.map(\.name).contains("create_event"))
     #expect(ToolCatalog.tools.map(\.name).contains("create_reminder"))
+
+    let calendarTools = ToolCatalog.tools(for: [.calendar])
+    #expect(calendarTools.count == 6)
+    #expect(!calendarTools.map(\.name).contains("create_reminder"))
 }
