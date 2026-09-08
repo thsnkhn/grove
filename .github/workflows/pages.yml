@@ -36,11 +36,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         shell: bash
         run: |
-          # Keep the empty feed until the first signed release exists.
+          # The repository has no release feed until the first signed release exists.
           gh api "repos/$GITHUB_REPOSITORY/releases" > "$RUNNER_TEMP/releases.json"
           release=$(jq -r '[.[] | select(.draft == false and .prerelease == false)][0].tag_name // empty' "$RUNNER_TEMP/releases.json")
           if [[ -n "$release" ]]; then
-            gh release download "$release" --repo "$GITHUB_REPOSITORY" --pattern appcast.xml --dir website --clobber
+            gh release download "$release" --repo "$GITHUB_REPOSITORY" --pattern 'appcast-*.xml' --dir website --clobber
           fi
 
       - name: Upload website

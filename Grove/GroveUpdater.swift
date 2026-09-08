@@ -13,6 +13,16 @@ final class GroveUpdater: NSObject, ObservableObject {
     #if canImport(Sparkle)
     private var controller: SPUStandardUpdaterController?
 
+    private static let feedURL: String? = {
+        #if arch(arm64)
+        "https://thsnkhn.github.io/grove/appcast-arm64.xml"
+        #elseif arch(x86_64)
+        "https://thsnkhn.github.io/grove/appcast-intel.xml"
+        #else
+        nil
+        #endif
+    }()
+
     #endif
 
     override init() {
@@ -20,9 +30,10 @@ final class GroveUpdater: NSObject, ObservableObject {
         #if canImport(Sparkle)
         guard !GroveLaunchMode.isHeadless else { return }
         let controller = SPUStandardUpdaterController(
-            startingUpdater: true, updaterDelegate: nil, userDriverDelegate: self
+            startingUpdater: true, updaterDelegate: self, userDriverDelegate: self
         )
         self.controller = controller
+        controller.updater.clearFeedURLFromUserDefaults()
         controller.updater.publisher(for: \.canCheckForUpdates)
             .receive(on: DispatchQueue.main)
             .assign(to: &$canCheckForUpdates)
@@ -46,6 +57,12 @@ final class GroveUpdater: NSObject, ObservableObject {
 }
 
 #if canImport(Sparkle)
+extension GroveUpdater: SPUUpdaterDelegate {
+    func feedURLString(for updater: SPUUpdater) -> String? {
+        Self.feedURL
+    }
+}
+
 // Sparkle calls its UI delegate on the main thread; its Objective-C protocol lacks actor annotations.
 extension GroveUpdater: @preconcurrency SPUStandardUserDriverDelegate {
     var supportsGentleScheduledUpdateReminders: Bool { true }

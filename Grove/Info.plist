@@ -18,8 +18,6 @@
 	<string>APPL</string>
 	<key>LSUIElement</key>
 	<true/>
-	<key>SUFeedURL</key>
-	<string>https://thsnkhn.github.io/grove/appcast.xml</string>
 	<key>SUPublicEDKey</key>
 	<string>mUSbv8xOsmdA/lmEmcaIrNLmYL0RR0qhMab0xNdwuh8=</string>
 	<key>SUEnableAutomaticChecks</key>

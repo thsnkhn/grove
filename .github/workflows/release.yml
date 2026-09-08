@@ -41,8 +41,8 @@ jobs:
           jq -e --arg tag "v$VERSION" 'all(.[]; .tag_name != $tag)' "$RUNNER_TEMP/releases.json"
           latest=$(jq -r '[.[] | select(.draft == false and .prerelease == false)][0].tag_name // empty' "$RUNNER_TEMP/releases.json")
           if [[ -n "$latest" ]]; then
-            gh release download "$latest" --repo "$GITHUB_REPOSITORY" --pattern appcast.xml --dir "$RUNNER_TEMP"
-            previous=$(xmllint --xpath 'string(/rss/channel/item[1]/*[local-name()="version"])' "$RUNNER_TEMP/appcast.xml")
+            gh release download "$latest" --repo "$GITHUB_REPOSITORY" --pattern appcast-arm64.xml --dir "$RUNNER_TEMP"
+            previous=$(xmllint --xpath 'string(/rss/channel/item[1]/*[local-name()="version"])' "$RUNNER_TEMP/appcast-arm64.xml")
             [[ "$previous" =~ ^[1-9][0-9]*$ && "$BUILD_NUMBER" -gt "$previous" ]]
           fi
       - name: Import signing certificate
@@ -85,11 +85,11 @@ jobs:
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
           files: |
-            dist/Grove-${{ inputs.version }}.zip
             dist/Grove-Apple-Silicon.zip
             dist/Grove-Intel.zip
             dist/SHA256SUMS
-            dist/appcast.xml
+            dist/appcast-arm64.xml
+            dist/appcast-intel.xml
       - name: Remove signing material
         if: always()
         run: |

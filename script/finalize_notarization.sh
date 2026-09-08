@@ -3,23 +3,20 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
-APP_BUNDLE="$DIST_DIR/Grove.app"
 APPLE_SILICON_APP_BUNDLE="$DIST_DIR/Grove-Apple-Silicon.app"
 INTEL_APP_BUNDLE="$DIST_DIR/Grove-Intel.app"
 VERSION="$(sed -n 's/.*static let version = "\([^"]*\)".*/\1/p' "$ROOT_DIR/Grove/GroveApp.swift")"
 NOTARY_PROFILE="${NOTARY_PROFILE:-XCode Notary}"
-ZIP_PATH="$DIST_DIR/Grove-$VERSION.zip"
 APPLE_SILICON_ZIP="$DIST_DIR/Grove-Apple-Silicon.zip"
 INTEL_ZIP="$DIST_DIR/Grove-Intel.zip"
 
-for app_bundle in "$APPLE_SILICON_APP_BUNDLE" "$INTEL_APP_BUNDLE" "$APP_BUNDLE"; do
+for app_bundle in "$APPLE_SILICON_APP_BUNDLE" "$INTEL_APP_BUNDLE"; do
   [[ -d "$app_bundle" ]] || { echo "Prepared app not found: $app_bundle" >&2; exit 1; }
 done
 
 RECORDS=(
   "$DIST_DIR/notarization-apple-silicon.json"
   "$DIST_DIR/notarization-intel.json"
-  "$DIST_DIR/notarization-universal.json"
 )
 
 for record in "${RECORDS[@]}"; do
@@ -50,13 +47,12 @@ staple_app() {
 
 staple_app "$APPLE_SILICON_APP_BUNDLE"
 staple_app "$INTEL_APP_BUNDLE"
-staple_app "$APP_BUNDLE"
 
 ditto -c -k --keepParent "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_ZIP"
 ditto -c -k --keepParent "$INTEL_APP_BUNDLE" "$INTEL_ZIP"
-ditto -c -k --keepParent "$APP_BUNDLE" "$ZIP_PATH"
-(cd "$DIST_DIR" && shasum -a 256 "Grove-$VERSION.zip" "Grove-Apple-Silicon.zip" "Grove-Intel.zip" > SHA256SUMS)
-bash "$ROOT_DIR/script/generate_appcast.sh" "$ZIP_PATH"
+(cd "$DIST_DIR" && shasum -a 256 "Grove-Apple-Silicon.zip" "Grove-Intel.zip" > SHA256SUMS)
+bash "$ROOT_DIR/script/generate_appcast.sh" "$APPLE_SILICON_ZIP" appcast-arm64.xml
+bash "$ROOT_DIR/script/generate_appcast.sh" "$INTEL_ZIP" appcast-intel.xml
 
 echo "Finalized notarized Grove $VERSION."
 echo "Run PREPARED_RELEASE=YES script/release-sparkle.sh $VERSION <build> to publish it."

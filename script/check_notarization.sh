@@ -16,11 +16,7 @@ else
   RECORDS=(
     "$DIST_DIR/notarization-apple-silicon.json"
     "$DIST_DIR/notarization-intel.json"
-    "$DIST_DIR/notarization-universal.json"
   )
-  if [[ ! -f "${RECORDS[0]}" && ! -f "${RECORDS[1]}" && ! -f "${RECORDS[2]}" && -f "$DIST_DIR/notarization.json" ]]; then
-    RECORDS=("$DIST_DIR/notarization.json")
-  fi
 fi
 
 found_record=NO

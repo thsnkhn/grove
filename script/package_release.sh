@@ -8,8 +8,6 @@ SCHEME="Grove"
 BUILD_ROOT="$ROOT_DIR/build/ReleaseDerivedData"
 APP_NAME="Grove"
 EXECUTABLE_NAME="Grove"
-APP_BUNDLE="$DIST_DIR/$APP_NAME.app"
-APP_BINARY="$APP_BUNDLE/Contents/MacOS/$EXECUTABLE_NAME"
 APPLE_SILICON_APP_BUNDLE="$DIST_DIR/Grove-Apple-Silicon.app"
 INTEL_APP_BUNDLE="$DIST_DIR/Grove-Intel.app"
 APPLE_SILICON_ZIP="$DIST_DIR/Grove-Apple-Silicon.zip"
@@ -47,21 +45,16 @@ fi
 
 APPLE_SILICON_RECORD="$DIST_DIR/notarization-apple-silicon.json"
 INTEL_RECORD="$DIST_DIR/notarization-intel.json"
-UNIVERSAL_RECORD="$DIST_DIR/notarization-universal.json"
 
 rm -rf \
-  "$APP_BUNDLE" \
   "$APPLE_SILICON_APP_BUNDLE" \
   "$INTEL_APP_BUNDLE" \
   "$BUILD_ROOT" \
-  "$DIST_DIR/Grove-$VERSION.zip" \
   "$APPLE_SILICON_ZIP" \
   "$INTEL_ZIP" \
   "$DIST_DIR/SHA256SUMS" \
   "$APPLE_SILICON_RECORD" \
-  "$INTEL_RECORD" \
-  "$UNIVERSAL_RECORD" \
-  "$DIST_DIR/notarization.json"
+  "$INTEL_RECORD"
 mkdir -p "$DIST_DIR"
 
 build_arch() {
@@ -91,8 +84,6 @@ X86_BINARY="$X86_APP/Contents/MacOS/$EXECUTABLE_NAME"
 
 ditto "$ARM_APP" "$APPLE_SILICON_APP_BUNDLE"
 ditto "$X86_APP" "$INTEL_APP_BUNDLE"
-ditto "$ARM_APP" "$APP_BUNDLE"
-lipo -create "$ARM_BINARY" "$X86_BINARY" -output "$APP_BINARY"
 
 sign_app() {
   local app_bundle="$1"
@@ -119,23 +110,15 @@ if ! lipo -archs "$INTEL_APP_BUNDLE/Contents/MacOS/$EXECUTABLE_NAME" | grep -qw 
   echo "Intel app does not contain an x86_64 executable." >&2
   exit 1
 fi
-if ! lipo -archs "$APP_BINARY" | grep -qw arm64 || ! lipo -archs "$APP_BINARY" | grep -qw x86_64; then
-  echo "Universal app does not contain arm64 and x86_64 executables." >&2
-  exit 1
-fi
-
 sign_app "$APPLE_SILICON_APP_BUNDLE"
 sign_app "$INTEL_APP_BUNDLE"
-sign_app "$APP_BUNDLE"
 
-ZIP_PATH="$DIST_DIR/Grove-$VERSION.zip"
 zip_app() {
   ditto -c -k --keepParent "$1" "$2"
 }
 
 zip_app "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_ZIP"
 zip_app "$INTEL_APP_BUNDLE" "$INTEL_ZIP"
-zip_app "$APP_BUNDLE" "$ZIP_PATH"
 
 submit_notarization() {
   local archive="$1"
@@ -152,7 +135,6 @@ submit_notarization() {
 
 submit_notarization "$APPLE_SILICON_ZIP" "$APPLE_SILICON_RECORD"
 submit_notarization "$INTEL_ZIP" "$INTEL_RECORD"
-submit_notarization "$ZIP_PATH" "$UNIVERSAL_RECORD"
 
 if [[ "$WAIT_FOR_NOTARIZATION" == "NO" ]]; then
   echo "Notarization is pending. Run script/check_notarization.sh later."
@@ -167,15 +149,15 @@ staple_app() {
 
 staple_app "$APPLE_SILICON_APP_BUNDLE"
 staple_app "$INTEL_APP_BUNDLE"
-staple_app "$APP_BUNDLE"
 
 # Recreate every archive so each downloaded app includes its notarization ticket.
 zip_app "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_ZIP"
 zip_app "$INTEL_APP_BUNDLE" "$INTEL_ZIP"
-zip_app "$APP_BUNDLE" "$ZIP_PATH"
 
-(cd "$DIST_DIR" && shasum -a 256 "Grove-$VERSION.zip" "Grove-Apple-Silicon.zip" "Grove-Intel.zip" > SHA256SUMS)
-bash "$ROOT_DIR/script/generate_appcast.sh" "$ZIP_PATH"
+(cd "$DIST_DIR" && shasum -a 256 "Grove-Apple-Silicon.zip" "Grove-Intel.zip" > SHA256SUMS)
+bash "$ROOT_DIR/script/generate_appcast.sh" "$APPLE_SILICON_ZIP" appcast-arm64.xml
+bash "$ROOT_DIR/script/generate_appcast.sh" "$INTEL_ZIP" appcast-intel.xml
 echo "Created $APPLE_SILICON_ZIP"
 echo "Created $INTEL_ZIP"
-echo "Created $ZIP_PATH"
+echo "Created $DIST_DIR/appcast-arm64.xml"
+echo "Created $DIST_DIR/appcast-intel.xml"

@@ -2,9 +2,10 @@
 
 Grove is a local-only macOS menu bar app and stdio MCP server. It accesses Calendar and Reminders through EventKit. It does not run a network listener or send Calendar or Reminders data to a hosted backend.
 
-The menu bar app uses Sparkle to check an HTTPS appcast on GitHub Pages and
-download updates from GitHub Releases. Update archives must pass EdDSA signature
-verification. The release workflow also signs and notarizes the app with Apple.
+The menu bar app uses Sparkle to check an architecture-specific HTTPS appcast on
+GitHub Pages and download updates from GitHub Releases. Update archives must
+pass EdDSA signature verification. The release workflow also signs and
+notarizes the app with Apple.
 Report update-signature bypasses through the same private reporting flow below.
 
 ## Supported Versions

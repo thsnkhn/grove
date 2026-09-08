@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle">
+  <channel>
+    <title>Grove Updates</title>
+    <link>https://thsnkhn.github.io/grove/</link>
+    <description>Stable Intel releases of Grove for macOS.</description>
+    <language>en</language>
+  </channel>
+</rss>

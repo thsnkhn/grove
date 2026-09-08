@@ -26,7 +26,7 @@ polling loops, or a database without a clear product requirement.
 - `script/package_release.sh`: lower-level signed packaging command.
 - `script/release-sparkle.sh`: guarded release and publication command.
 - `skills/grove/SKILL.md`: portable agent instructions for Grove tools.
-- `website/`: GitHub Pages site and initial appcast.
+- `website/`: GitHub Pages site and architecture-specific appcasts.
 
 ## Build and run
 
@@ -189,9 +189,9 @@ WAIT_FOR_NOTARIZATION=NO ./script/release-sparkle.sh 0.1.0 1
 ```
 
 The script checks the version, build number, notes, and worktree. It builds
-signed Apple silicon, Intel, and universal archives, submits each archive, and
-records the Apple requests in `dist/notarization-*.json`. It does not publish
-an unnotarized app.
+signed Apple silicon and Intel archives, submits both archives, and records the
+Apple requests in `dist/notarization-*.json`. It does not publish an
+unnotarized app.
 
 Check and finalize the release after Apple accepts it:
 
@@ -202,14 +202,10 @@ PREPARED_RELEASE=YES RELEASE_NOTES_FILE="docs/releases/0.1.0.md" \
   ./script/release-sparkle.sh 0.1.0 1
 ```
 
-The final release step creates a signed Git tag, publishes the Apple silicon,
-Intel, and universal GitHub Release assets, and starts the GitHub Pages
-deployment. The website download button selects the native archive. Sparkle
-uses the universal archive for in-app updates.
-
-For a packaging-only correction to the first release, set
-`PUBLISH_EXISTING_RELEASE=YES` on the prepared release command. This keeps the
-existing tag and replaces its release assets.
+The final release step creates a signed Git tag, publishes the Apple silicon
+and Intel GitHub Release assets and their architecture-specific appcasts, and
+starts the GitHub Pages deployment. The website download button selects the
+native archive. Sparkle selects the matching appcast at runtime.
 
 Required private values must stay outside the repository:
 
