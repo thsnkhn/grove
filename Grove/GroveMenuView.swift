@@ -50,12 +50,12 @@ struct GroveMenuView: View {
             } label: {
                 HStack {
                     Text("Grove")
-                        .font(.title3.weight(.semibold))
+                        .font(.system(size: 15, weight: .semibold))
 
                     Spacer()
 
                     Image(systemName: "chevron.right")
-                        .font(.system(size: 14, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(.secondary)
                         .rotationEffect(.degrees(showsOptions ? 90 : 0))
                 }
@@ -136,29 +136,29 @@ private struct ServiceRow: View {
         Button {
             action?()
         } label: {
-            HStack(spacing: 12) {
+            HStack(spacing: 10) {
                 ZStack {
                     Circle()
                         .fill(isEnabled ? Color.white.opacity(0.94) : Color.secondary.opacity(0.32))
 
                     Image(systemName: symbolName)
-                        .font(.system(size: 17, weight: .medium))
+                        .font(.system(size: 14, weight: .medium))
                         .symbolRenderingMode(.hierarchical)
                         .foregroundStyle(isEnabled ? color : Color.white.opacity(0.88))
                 }
-                .frame(width: 32, height: 32)
+                .frame(width: 26, height: 26)
 
                 Text(title)
-                    .font(.system(size: 16, weight: .medium))
+                    .font(.system(size: 14, weight: .regular))
                     .foregroundStyle(action == nil ? .secondary : .primary)
 
                 Spacer(minLength: 8)
 
                 Text(status)
-                    .font(.system(size: 14))
+                    .font(.system(size: 12))
                     .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
