@@ -5,12 +5,13 @@ const DOWNLOADS = {
 };
 
 const downloadLink = document.querySelector("[data-download-link]");
+const downloadLabel = document.querySelector("[data-download-label]");
 
 function setDownloadTarget(architecture) {
   const isAppleSilicon = architecture === "appleSilicon";
 
   downloadLink.href = DOWNLOADS[architecture];
-  downloadLink.lastChild.textContent = `Download for ${isAppleSilicon ? "Apple silicon" : "Intel"}`;
+  downloadLabel.textContent = `Download for ${isAppleSilicon ? "Apple silicon" : "Intel"}`;
 }
 
 function detectGraphicsArchitecture() {

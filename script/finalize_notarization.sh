@@ -4,34 +4,58 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
 APP_BUNDLE="$DIST_DIR/Grove.app"
+APPLE_SILICON_APP_BUNDLE="$DIST_DIR/Grove-Apple-Silicon.app"
+INTEL_APP_BUNDLE="$DIST_DIR/Grove-Intel.app"
 VERSION="$(sed -n 's/.*static let version = "\([^"]*\)".*/\1/p' "$ROOT_DIR/Grove/GroveApp.swift")"
-RECORD_PATH="${1:-$DIST_DIR/notarization.json}"
 NOTARY_PROFILE="${NOTARY_PROFILE:-XCode Notary}"
 ZIP_PATH="$DIST_DIR/Grove-$VERSION.zip"
+APPLE_SILICON_ZIP="$DIST_DIR/Grove-Apple-Silicon.zip"
+INTEL_ZIP="$DIST_DIR/Grove-Intel.zip"
 
-[[ -d "$APP_BUNDLE" ]] || { echo "Prepared app not found: $APP_BUNDLE" >&2; exit 1; }
-[[ -f "$RECORD_PATH" ]] || { echo "Notarization record not found: $RECORD_PATH" >&2; exit 1; }
+for app_bundle in "$APPLE_SILICON_APP_BUNDLE" "$INTEL_APP_BUNDLE" "$APP_BUNDLE"; do
+  [[ -d "$app_bundle" ]] || { echo "Prepared app not found: $app_bundle" >&2; exit 1; }
+done
 
-SUBMISSION_ID="$(sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$RECORD_PATH" | head -n 1)"
-[[ -n "$SUBMISSION_ID" ]] || { echo "No submission ID found in $RECORD_PATH." >&2; exit 1; }
+RECORDS=(
+  "$DIST_DIR/notarization-apple-silicon.json"
+  "$DIST_DIR/notarization-intel.json"
+  "$DIST_DIR/notarization-universal.json"
+)
 
-STATUS_OUTPUT="$(xcrun notarytool info "$SUBMISSION_ID" --keychain-profile "$NOTARY_PROFILE")"
-printf '%s\n' "$STATUS_OUTPUT"
+for record in "${RECORDS[@]}"; do
+  [[ -f "$record" ]] || { echo "Notarization record not found: $record" >&2; exit 1; }
 
-if ! grep -q 'status: Accepted' <<< "$STATUS_OUTPUT"; then
-  if grep -q 'status: Invalid' <<< "$STATUS_OUTPUT"; then
-    echo "Apple rejected the notarization. Fetch the log with:" >&2
-    echo "xcrun notarytool log $SUBMISSION_ID --keychain-profile \"$NOTARY_PROFILE\"" >&2
-  else
-    echo "Notarization is not accepted yet. Run this script again later." >&2
+  SUBMISSION_ID="$(sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$record" | head -n 1)"
+  [[ -n "$SUBMISSION_ID" ]] || { echo "No submission ID found in $record." >&2; exit 1; }
+
+  STATUS_OUTPUT="$(xcrun notarytool info "$SUBMISSION_ID" --keychain-profile "$NOTARY_PROFILE")"
+  printf '%s\n' "$STATUS_OUTPUT"
+
+  if ! grep -q 'status: Accepted' <<< "$STATUS_OUTPUT"; then
+    if grep -q 'status: Invalid' <<< "$STATUS_OUTPUT"; then
+      echo "Apple rejected the notarization. Fetch the log with:" >&2
+      echo "xcrun notarytool log $SUBMISSION_ID --keychain-profile \"$NOTARY_PROFILE\"" >&2
+    else
+      echo "Notarization is not accepted yet. Run this script again later." >&2
+    fi
+    exit 2
   fi
-  exit 2
-fi
+done
 
-xcrun stapler staple "$APP_BUNDLE"
-xcrun stapler validate "$APP_BUNDLE"
+staple_app() {
+  local app_bundle="$1"
+  xcrun stapler staple "$app_bundle"
+  xcrun stapler validate "$app_bundle"
+}
+
+staple_app "$APPLE_SILICON_APP_BUNDLE"
+staple_app "$INTEL_APP_BUNDLE"
+staple_app "$APP_BUNDLE"
+
+ditto -c -k --keepParent "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_ZIP"
+ditto -c -k --keepParent "$INTEL_APP_BUNDLE" "$INTEL_ZIP"
 ditto -c -k --keepParent "$APP_BUNDLE" "$ZIP_PATH"
-(cd "$DIST_DIR" && shasum -a 256 "Grove-$VERSION.zip" > SHA256SUMS)
+(cd "$DIST_DIR" && shasum -a 256 "Grove-$VERSION.zip" "Grove-Apple-Silicon.zip" "Grove-Intel.zip" > SHA256SUMS)
 bash "$ROOT_DIR/script/generate_appcast.sh" "$ZIP_PATH"
 
 echo "Finalized notarized Grove $VERSION."

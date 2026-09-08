@@ -2,23 +2,43 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-RECORD_PATH="${1:-$ROOT_DIR/dist/notarization.json}"
+DIST_DIR="$ROOT_DIR/dist"
 NOTARY_PROFILE="${NOTARY_PROFILE:-XCode Notary}"
 
-[[ -f "$RECORD_PATH" ]] || {
-  echo "Notarization record not found: $RECORD_PATH" >&2
-  exit 1
-}
 [[ -n "$NOTARY_PROFILE" ]] || {
   echo "Set NOTARY_PROFILE to the keychain profile used for submission." >&2
   exit 1
 }
 
-SUBMISSION_ID="$(sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$RECORD_PATH" | head -n 1)"
-[[ -n "$SUBMISSION_ID" ]] || {
-  echo "No submission ID found in $RECORD_PATH." >&2
+if [[ $# -gt 0 ]]; then
+  RECORDS=("$@")
+else
+  RECORDS=(
+    "$DIST_DIR/notarization-apple-silicon.json"
+    "$DIST_DIR/notarization-intel.json"
+    "$DIST_DIR/notarization-universal.json"
+  )
+  if [[ ! -f "${RECORDS[0]}" && ! -f "${RECORDS[1]}" && ! -f "${RECORDS[2]}" && -f "$DIST_DIR/notarization.json" ]]; then
+    RECORDS=("$DIST_DIR/notarization.json")
+  fi
+fi
+
+found_record=NO
+for record in "${RECORDS[@]}"; do
+  [[ -f "$record" ]] || continue
+  found_record=YES
+
+  SUBMISSION_ID="$(sed -n 's/.*"id"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' "$record" | head -n 1)"
+  [[ -n "$SUBMISSION_ID" ]] || {
+    echo "No submission ID found in $record." >&2
+    exit 1
+  }
+
+  echo "Checking $(basename "$record") request $SUBMISSION_ID..."
+  xcrun notarytool info "$SUBMISSION_ID" --keychain-profile "$NOTARY_PROFILE"
+done
+
+[[ "$found_record" == YES ]] || {
+  echo "No notarization records found in $DIST_DIR." >&2
   exit 1
 }
-
-echo "Checking notarization request $SUBMISSION_ID..."
-xcrun notarytool info "$SUBMISSION_ID" --keychain-profile "$NOTARY_PROFILE"

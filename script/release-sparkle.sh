@@ -13,10 +13,13 @@ VERSION="${REQUESTED_VERSION#v}"
 BUILD_NUMBER="${2:-${GROVE_BUILD_NUMBER:-}}"
 RELEASE_TAG="v$VERSION"
 ZIP_PATH="$ROOT_DIR/dist/Grove-$VERSION.zip"
+APPLE_SILICON_ZIP="$ROOT_DIR/dist/Grove-Apple-Silicon.zip"
+INTEL_ZIP="$ROOT_DIR/dist/Grove-Intel.zip"
 CHECKSUM_PATH="$ROOT_DIR/dist/SHA256SUMS"
 APPCAST_PATH="$ROOT_DIR/dist/appcast.xml"
 WAIT_FOR_NOTARIZATION="${WAIT_FOR_NOTARIZATION:-YES}"
 PREPARED_RELEASE="${PREPARED_RELEASE:-NO}"
+PUBLISH_EXISTING_RELEASE="${PUBLISH_EXISTING_RELEASE:-NO}"
 
 usage() {
   echo "Usage: RELEASE_NOTES_FILE=<path> $0 <version> <build-number>" >&2
@@ -26,6 +29,11 @@ if [[ $# -lt 1 || $# -gt 2 || -z "$BUILD_NUMBER" ]]; then
   usage
   exit 1
 fi
+
+[[ "$PUBLISH_EXISTING_RELEASE" == "YES" || "$PUBLISH_EXISTING_RELEASE" == "NO" ]] || {
+  echo "PUBLISH_EXISTING_RELEASE must be YES or NO." >&2
+  exit 1
+}
 
 [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]] || { echo "Version must use x.y.z." >&2; exit 1; }
 [[ "$BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]] || { echo "Build number must be a positive integer." >&2; exit 1; }
@@ -71,7 +79,8 @@ else
   fi
 fi
 
-for artifact in "$ZIP_PATH" "$CHECKSUM_PATH" "$APPCAST_PATH"; do
+ARTIFACTS=("$ZIP_PATH" "$APPLE_SILICON_ZIP" "$INTEL_ZIP")
+for artifact in "${ARTIFACTS[@]}" "$CHECKSUM_PATH" "$APPCAST_PATH"; do
   [[ -f "$artifact" ]] || { echo "Missing release artifact: $artifact" >&2; exit 1; }
 done
 
@@ -84,7 +93,7 @@ else
   git tag -s "$RELEASE_TAG" -m "Grove $VERSION"
 fi
 
-if [[ "$(git rev-list -n 1 "$RELEASE_TAG")" != "$(git rev-parse HEAD)" ]]; then
+if [[ "$PUBLISH_EXISTING_RELEASE" != "YES" && "$(git rev-list -n 1 "$RELEASE_TAG")" != "$(git rev-parse HEAD)" ]]; then
   echo "Tag $RELEASE_TAG does not point to HEAD." >&2
   exit 1
 fi
@@ -112,7 +121,7 @@ if ! gh release view "$RELEASE_TAG" --repo "$GITHUB_REPO" >/dev/null 2>&1; then
 fi
 
 echo "Uploading release artifacts..."
-gh release upload "$RELEASE_TAG" "$ZIP_PATH" "$CHECKSUM_PATH" "$APPCAST_PATH" \
+gh release upload "$RELEASE_TAG" "${ARTIFACTS[@]}" "$CHECKSUM_PATH" "$APPCAST_PATH" \
   --repo "$GITHUB_REPO" \
   --clobber
 

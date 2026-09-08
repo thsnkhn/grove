@@ -35,7 +35,7 @@ integrations will appear as they become available.
 
 Grove requires macOS 14 or later.
 
-When a release is available, download Grove from [GitHub Releases](https://github.com/thsnkhn/grove/releases), open it, and allow Calendar or Reminders access when macOS asks.
+When a release is available, download Grove from the [Grove download page](https://thsnkhn.github.io/grove/). It selects the Apple silicon or Intel archive for your Mac. Open the app, then allow Calendar or Reminders access when macOS asks.
 
 Open Grove before you use it. The app keeps its local MCP server ready while it
 runs. Connect Grove to your AI assistant through its MCP setup. Developer and

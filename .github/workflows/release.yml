@@ -86,6 +86,8 @@ jobs:
           generate_release_notes: true
           files: |
             dist/Grove-${{ inputs.version }}.zip
+            dist/Grove-Apple-Silicon.zip
+            dist/Grove-Intel.zip
             dist/SHA256SUMS
             dist/appcast.xml
       - name: Remove signing material
