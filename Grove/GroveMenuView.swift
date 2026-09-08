@@ -92,7 +92,7 @@ struct GroveMenuView: View {
 
                 Spacer()
             }
-            .frame(height: 40)
+            .frame(height: 32)
 
             Divider()
 
@@ -123,7 +123,7 @@ struct GroveMenuView: View {
                 Spacer()
             }
             .contentShape(Rectangle())
-            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
         }
         .buttonStyle(.plain)
     }
@@ -149,7 +149,7 @@ private struct ServiceRow: View {
         Button {
             action?()
         } label: {
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 ZStack {
                     Circle()
                         .fill(isEnabled
@@ -165,15 +165,15 @@ private struct ServiceRow: View {
 
                 Text(title)
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundStyle(action == nil ? .secondary : .primary)
+                    .foregroundStyle(action == nil ? Color.secondary.opacity(0.65) : .primary)
 
                 Spacer(minLength: 8)
 
                 Text(status)
                     .font(.system(size: 12))
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(action == nil ? Color.secondary.opacity(0.65) : .secondary)
             }
-            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
