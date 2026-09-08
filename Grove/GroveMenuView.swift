@@ -75,7 +75,7 @@ struct GroveMenuView: View {
 
     private var options: some View {
         VStack(spacing: 0) {
-            HStack(spacing: 10) {
+            HStack(spacing: 8) {
                 Spacer()
 
                 Text("Launch at Login")
@@ -95,6 +95,7 @@ struct GroveMenuView: View {
             .frame(height: 32)
 
             Divider()
+                .opacity(0.65)
 
             #if canImport(Sparkle)
             optionButton(updater.updateAvailable ? "Update Available…" : "Check for Updates…") {
@@ -104,6 +105,7 @@ struct GroveMenuView: View {
             #endif
 
             Divider()
+                .opacity(0.65)
 
             optionButton("Quit Grove", role: .destructive) {
                 NSApplication.shared.terminate(nil)
@@ -120,6 +122,7 @@ struct GroveMenuView: View {
             HStack {
                 Text(title)
                     .font(.system(size: 14))
+                    .foregroundStyle(.primary)
                 Spacer()
             }
             .contentShape(Rectangle())

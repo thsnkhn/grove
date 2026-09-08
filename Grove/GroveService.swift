@@ -23,7 +23,7 @@ enum GroveService: String, CaseIterable, Hashable, Identifiable, Sendable {
     var filledSymbolName: String {
         switch self {
         case .calendar: return "calendar"
-        case .reminders: return "checklist"
+        case .reminders: return "list.bullet"
         }
     }
 
