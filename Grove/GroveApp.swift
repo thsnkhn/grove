@@ -75,10 +75,11 @@ final class GroveAppDelegate: NSObject, NSApplicationDelegate {
 struct GroveApp: App {
     @NSApplicationDelegateAdaptor(GroveAppDelegate.self) private var appDelegate
     @StateObject private var settings = GroveSettings()
+    @StateObject private var updater = GroveUpdater()
 
     var body: some Scene {
         MenuBarExtra("Grove", systemImage: "tree.fill") {
-            GroveMenuView(settings: settings)
+            GroveMenuView(settings: settings, updater: updater)
         }
         .menuBarExtraStyle(.window)
     }

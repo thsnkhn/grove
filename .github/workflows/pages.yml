@@ -7,6 +7,7 @@ on:
       - "website/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
@@ -29,6 +30,18 @@ jobs:
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
+
+      - name: Include the latest release appcast
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          # Keep the empty feed until the first signed release exists.
+          gh api "repos/$GITHUB_REPOSITORY/releases" > "$RUNNER_TEMP/releases.json"
+          release=$(jq -r '[.[] | select(.draft == false and .prerelease == false)][0].tag_name // empty' "$RUNNER_TEMP/releases.json")
+          if [[ -n "$release" ]]; then
+            gh release download "$release" --repo "$GITHUB_REPOSITORY" --pattern appcast.xml --dir website --clobber
+          fi
 
       - name: Upload website
         uses: actions/upload-pages-artifact@v3

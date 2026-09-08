@@ -41,7 +41,8 @@ Menu bar:
 - Enable Calendar and Reminders independently.
 - Start Grove at login with the native macOS login-item service.
 - Quit Grove and its registered MCP processes together.
-- Open the releases page from **Check for Updates…**.
+- Check for updates with Sparkle from **Check for Updates…**.
+- Check automatically by default, with a switch to turn checks off.
 
 The initial interface has 12 explicit tools. It does not include Calendar-list creation, Reminder-list creation, attendees, location alarms, native Reminders tags, sections, subtasks, or batch operations.
 
@@ -183,6 +184,7 @@ The manual release script builds Apple silicon and Intel-based Mac binaries, cre
 
 ```sh
 DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \
+GROVE_BUILD_NUMBER="2" \
 APPLE_ID="..." \
 APPLE_TEAM_ID="..." \
 NOTARYTOOL_PASSWORD="..." \
@@ -190,6 +192,36 @@ NOTARYTOOL_PASSWORD="..." \
 ```
 
 The signing certificate and notarization values are required. The script stops when they are missing.
+
+### Updates
+
+Sparkle checks [the appcast](https://thsnkhn.github.io/grove/appcast.xml) automatically
+while the menu bar app runs. Checks default to on. Users can turn them off in the
+menu bar. An available update changes the menu item to **Update Available…**.
+Sparkle asks before installing an update. Headless MCP commands do not
+start the updater. SwiftPM builds omit Sparkle to keep the lightweight build small.
+
+The release script signs Sparkle's nested code, notarizes the app, staples its
+ticket, recreates the ZIP, and generates a signed appcast. Each release needs a
+larger integer `GROVE_BUILD_NUMBER`; the display version must match `Grove.version`.
+
+Grove's EdDSA key is stored in the macOS Keychain under the account
+`com.thsnkhn.grove`. Keep a secure backup. Only the public key belongs in this
+repository. Local appcast generation uses that account. For CI, set
+`SPARKLE_ED_KEY_FILE` to a private key file.
+
+The manual GitHub Release workflow needs these repository secrets:
+
+- `DEVELOPER_ID_CERTIFICATE_BASE64`: the exported Developer ID certificate and private key in base64 P12 format.
+- `DEVELOPER_ID_CERTIFICATE_PASSWORD`: the P12 password.
+- `DEVELOPER_ID_APPLICATION`: the signing identity name.
+- `APPLE_ID`, `APPLE_TEAM_ID`, and `NOTARYTOOL_PASSWORD`: notarization credentials.
+- `SPARKLE_PRIVATE_KEY`: the exported Grove EdDSA private key.
+
+Run the Release workflow with the version and build number. It uploads the ZIP,
+checksum, and `appcast.xml` to GitHub Releases, then deploys GitHub Pages. Website
+deploys also fetch the latest stable release's appcast, so a website edit keeps
+the feed current. Until the first signed release, Pages serves an empty feed.
 
 ## Contributing
 

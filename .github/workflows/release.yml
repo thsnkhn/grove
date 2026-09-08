@@ -7,28 +7,91 @@ on:
         description: Grove version to publish
         required: true
         type: string
+      build_number:
+        description: Increasing integer greater than the previous release build
+        required: true
+        type: string
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
+concurrency:
+  group: grove-release
+  cancel-in-progress: false
 
 jobs:
   release:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
+      - name: Validate release inputs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ inputs.version }}
+          BUILD_NUMBER: ${{ inputs.build_number }}
+        run: |
+          set -euo pipefail
+          [[ "$VERSION" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]]
+          gh api "repos/$GITHUB_REPOSITORY/releases" > "$RUNNER_TEMP/releases.json"
+          jq -e --arg tag "v$VERSION" 'all(.[]; .tag_name != $tag)' "$RUNNER_TEMP/releases.json"
+          latest=$(jq -r '[.[] | select(.draft == false and .prerelease == false)][0].tag_name // empty' "$RUNNER_TEMP/releases.json")
+          if [[ -n "$latest" ]]; then
+            gh release download "$latest" --repo "$GITHUB_REPOSITORY" --pattern appcast.xml --dir "$RUNNER_TEMP"
+            previous=$(xmllint --xpath 'string(/rss/channel/item[1]/*[local-name()="version"])' "$RUNNER_TEMP/appcast.xml")
+            [[ "$previous" =~ ^[1-9][0-9]*$ && "$BUILD_NUMBER" -gt "$previous" ]]
+          fi
+      - name: Import signing certificate
+        env:
+          CERTIFICATE_BASE64: ${{ secrets.DEVELOPER_ID_CERTIFICATE_BASE64 }}
+          CERTIFICATE_PASSWORD: ${{ secrets.DEVELOPER_ID_CERTIFICATE_PASSWORD }}
+        run: |
+          set -euo pipefail
+          : "${CERTIFICATE_BASE64:?Add the Developer ID certificate secret.}"
+          keychain="$RUNNER_TEMP/grove-signing.keychain-db"
+          password=$(openssl rand -hex 24)
+          printf '%s' "$CERTIFICATE_BASE64" | base64 --decode > "$RUNNER_TEMP/grove.p12"
+          security create-keychain -p "$password" "$keychain"
+          security set-keychain-settings -lut 21600 "$keychain"
+          security unlock-keychain -p "$password" "$keychain"
+          security import "$RUNNER_TEMP/grove.p12" -P "$CERTIFICATE_PASSWORD" -A -t cert -f pkcs12 -k "$keychain"
+          security set-key-partition-list -S apple-tool:,apple:,codesign: -k "$password" "$keychain"
+          security list-keychains -d user -s "$keychain"
       - name: Build, sign, and notarize
         env:
           GROVE_VERSION: ${{ inputs.version }}
+          GROVE_BUILD_NUMBER: ${{ inputs.build_number }}
+          SPARKLE_PRIVATE_KEY: ${{ secrets.SPARKLE_PRIVATE_KEY }}
           DEVELOPER_ID_APPLICATION: ${{ secrets.DEVELOPER_ID_APPLICATION }}
           APPLE_ID: ${{ secrets.APPLE_ID }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
           NOTARYTOOL_PASSWORD: ${{ secrets.NOTARYTOOL_PASSWORD }}
-        run: ./script/package_release.sh
+        run: |
+          set -euo pipefail
+          : "${SPARKLE_PRIVATE_KEY:?Add the Grove Sparkle signing key secret.}"
+          umask 077
+          export SPARKLE_ED_KEY_FILE="$RUNNER_TEMP/grove-sparkle-key"
+          printf '%s' "$SPARKLE_PRIVATE_KEY" > "$SPARKLE_ED_KEY_FILE"
+          ./script/package_release.sh
       - name: Publish release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ inputs.version }}
           name: Grove ${{ inputs.version }}
+          target_commitish: ${{ github.sha }}
+          generate_release_notes: true
           files: |
             dist/Grove-${{ inputs.version }}.zip
             dist/SHA256SUMS
+            dist/appcast.xml
+      - name: Remove signing material
+        if: always()
+        run: |
+          security delete-keychain "$RUNNER_TEMP/grove-signing.keychain-db" || true
+          rm -f "$RUNNER_TEMP/grove.p12" "$RUNNER_TEMP/grove-sparkle-key"
+
+  pages:
+    needs: release
+    uses: ./.github/workflows/pages.yml

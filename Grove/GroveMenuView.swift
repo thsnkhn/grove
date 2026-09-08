@@ -3,6 +3,7 @@ import SwiftUI
 
 struct GroveMenuView: View {
     @ObservedObject var settings: GroveSettings
+    @ObservedObject var updater: GroveUpdater
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -45,19 +46,29 @@ struct GroveMenuView: View {
 
             Divider()
 
+            #if canImport(Sparkle)
+            Toggle("Automatically Check for Updates", isOn: Binding(
+                get: { updater.automaticallyChecksForUpdates },
+                set: { updater.setAutomaticallyChecksForUpdates($0) }
+            ))
+            .toggleStyle(.switch)
+            .controlSize(.small)
+            .padding(.horizontal, 8)
+            .padding(.vertical, 6)
+
             Button {
-                // TODO: Replace the release-page handoff with an appcast-backed updater.
-                guard let url = URL(string: "https://github.com/thsnkhn/grove/releases/latest") else { return }
-                NSWorkspace.shared.open(url)
+                updater.checkForUpdates()
             } label: {
-                Label("Check for Updates…", systemImage: "sparkles")
+                Label(updater.updateAvailable ? "Update Available…" : "Check for Updates…", systemImage: "sparkles")
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
             .buttonStyle(.borderless)
+            .disabled(!updater.canCheckForUpdates)
             .padding(.horizontal, 8)
             .padding(.vertical, 6)
 
             Divider()
+            #endif
 
             Button {
                 NSApplication.shared.terminate(nil)

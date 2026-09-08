@@ -14,6 +14,8 @@
 		A10000000000000000000096 /* GroveMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000017 /* GroveMenuView.swift */; };
 		A10000000000000000000097 /* GroveProcessRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000018 /* GroveProcessRegistry.swift */; };
 		A10000000000000000000098 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000081 /* MCP */; };
+		A10000000000000000000099 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000083 /* Sparkle */; };
+		A10000000000000000000100 /* GroveUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000019 /* GroveUpdater.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -27,6 +29,7 @@
 		A10000000000000000000017 /* GroveMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveMenuView.swift; sourceTree = "<group>"; };
 		A10000000000000000000018 /* GroveProcessRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveProcessRegistry.swift; sourceTree = "<group>"; };
 		A10000000000000000000020 /* Grove.app */ = {isa = PBXFileReference; explicitFileType = "wrapper.application"; includeInIndex = 0; path = Grove.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A10000000000000000000019 /* GroveUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveUpdater.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -35,6 +38,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000098 /* MCP in Frameworks */,
+				A10000000000000000000099 /* Sparkle in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -61,6 +65,7 @@
 				A10000000000000000000016 /* GroveSettings.swift */,
 				A10000000000000000000017 /* GroveMenuView.swift */,
 				A10000000000000000000018 /* GroveProcessRegistry.swift */,
+				A10000000000000000000019 /* GroveUpdater.swift */,
 			);
 			path = Grove;
 			sourceTree = "<group>";
@@ -91,6 +96,7 @@
 			name = Grove;
 			packageProductDependencies = (
 				A10000000000000000000081 /* MCP */,
+				A10000000000000000000083 /* Sparkle */,
 			);
 			productName = Grove;
 			productReference = A10000000000000000000020 /* Grove.app */;
@@ -120,6 +126,7 @@
 			mainGroup = A10000000000000000000030;
 			packageReferences = (
 				A10000000000000000000080 /* XCRemoteSwiftPackageReference "swift-sdk" */,
+				A10000000000000000000082 /* XCRemoteSwiftPackageReference "Sparkle" */,
 			);
 			productRefGroup = A10000000000000000000033 /* Products */;
 			projectDirPath = "";
@@ -156,6 +163,7 @@
 				A10000000000000000000095 /* GroveSettings.swift in Sources */,
 				A10000000000000000000096 /* GroveMenuView.swift in Sources */,
 				A10000000000000000000097 /* GroveProcessRegistry.swift in Sources */,
+				A10000000000000000000100 /* GroveUpdater.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -193,6 +201,7 @@
 				MARKETING_VERSION = 0.1.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thsnkhn.grove;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				EXECUTABLE_NAME = Grove;
 				PRODUCT_MODULE_NAME = Grove;
 				PRODUCT_NAME = Grove;
@@ -212,6 +221,7 @@
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 0.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thsnkhn.grove;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				EXECUTABLE_NAME = Grove;
 				PRODUCT_MODULE_NAME = Grove;
 				PRODUCT_NAME = Grove;
@@ -252,6 +262,11 @@
 				minimumVersion = 0.11.0;
 			};
 		};
+		A10000000000000000000082 /* XCRemoteSwiftPackageReference "Sparkle" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/sparkle-project/Sparkle";
+			requirement = {kind = upToNextMajorVersion; minimumVersion = 2.9.6; };
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -259,6 +274,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = A10000000000000000000080 /* XCRemoteSwiftPackageReference "swift-sdk" */;
 			productName = MCP;
+		};
+		A10000000000000000000083 /* Sparkle */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000000000000000000082 /* XCRemoteSwiftPackageReference "Sparkle" */;
+			productName = Sparkle;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
