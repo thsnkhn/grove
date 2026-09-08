@@ -14,7 +14,7 @@ TEMPLATE="$ROOT_DIR/website/$FEED_NAME"
 [[ -f "$TEMPLATE" ]] || { echo "Appcast template not found: $TEMPLATE" >&2; exit 1; }
 
 cp "$ARCHIVE" "$STAGING/$ARCHIVE_NAME"
-cp "$TEMPLATE" "$STAGING/$FEED_NAME"
+cp "$TEMPLATE" "$STAGING/appcast.xml"
 SIGNING=(--account com.thsnkhn.grove)
 if [[ -n "${SPARKLE_ED_KEY_FILE:-}" ]]; then
   SIGNING=(--ed-key-file "$SPARKLE_ED_KEY_FILE")
@@ -29,10 +29,10 @@ fi
   "$STAGING"
 
 # Never publish a feed if signing failed or the archive used a different key.
-signature=$(/usr/bin/xmllint --xpath 'string(/rss/channel/item/enclosure/@*[local-name()="edSignature"])' "$STAGING/$FEED_NAME")
+signature=$(/usr/bin/xmllint --xpath 'string(/rss/channel/item/enclosure/@*[local-name()="edSignature"])' "$STAGING/appcast.xml")
 [[ -n "$signature" ]] || { echo "Appcast has no EdDSA signature." >&2; exit 1; }
 swift "$ROOT_DIR/script/verify_update.swift" "$ARCHIVE" "$signature" \
   "$(/usr/libexec/PlistBuddy -c 'Print :SUPublicEDKey' "$ROOT_DIR/Grove/Info.plist")"
 
 mkdir -p "$ROOT_DIR/dist"
-cp "$STAGING/$FEED_NAME" "$ROOT_DIR/dist/$FEED_NAME"
+cp "$STAGING/appcast.xml" "$ROOT_DIR/dist/$FEED_NAME"
