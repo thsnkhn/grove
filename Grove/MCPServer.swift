@@ -3,8 +3,17 @@ import MCP
 
 struct GroveServer {
     let store: EventKitStore
+    let enabledServices: Set<GroveService>
+
+    init(store: EventKitStore, enabledServices: Set<GroveService>) {
+        self.store = store
+        self.enabledServices = enabledServices
+    }
 
     func run() async throws {
+        let lease = try GroveProcessLease()
+        defer { _ = lease }
+
         let server = Server(
             name: "grove",
             version: Grove.version,
@@ -13,11 +22,14 @@ struct GroveServer {
         )
 
         await server.withMethodHandler(ListTools.self) { _ in
-            ListTools.Result(tools: ToolCatalog.tools)
+            ListTools.Result(tools: ToolCatalog.tools(for: enabledServices))
         }
 
-        await server.withMethodHandler(CallTool.self) { [store] (params: CallTool.Parameters) in
+        await server.withMethodHandler(CallTool.self) { [store, enabledServices] (params: CallTool.Parameters) in
             do {
+                guard let service = ToolCatalog.service(for: params.name), enabledServices.contains(service) else {
+                    throw GroveError.serviceDisabled("The `\(params.name)` tool is disabled in Grove.")
+                }
                 let value = try await store.handle(params.name, arguments: params.arguments ?? [:])
                 return try CallTool.Result(
                     content: [.text(text: jsonText(value), annotations: nil, _meta: nil)],
@@ -133,6 +145,17 @@ enum ToolCatalog {
             annotations: .init(destructiveHint: true, idempotentHint: true)
         )
     ]
+
+    static func tools(for enabledServices: Set<GroveService>) -> [Tool] {
+        tools.filter { tool in
+            guard let service = service(for: tool.name) else { return false }
+            return enabledServices.contains(service)
+        }
+    }
+
+    static func service(for toolName: String) -> GroveService? {
+        GroveService.allCases.first { $0.toolNames.contains(toolName) }
+    }
 
     private static func schema(properties: [String: Value] = [:], required: [String] = []) -> Value {
         var value: [String: Value] = [

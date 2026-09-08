@@ -10,5 +10,15 @@ jobs:
     runs-on: macos-14
     steps:
       - uses: actions/checkout@v4
-      - name: Test
+      - name: Test Swift package
         run: swift test
+      - name: Build Xcode project
+        run: |
+          xcodebuild build \
+            -project Grove.xcodeproj \
+            -scheme Grove \
+            -destination 'platform=macOS,arch=arm64' \
+            -derivedDataPath build/GroveDerivedData \
+            ARCHS=arm64 \
+            ONLY_ACTIVE_ARCH=YES \
+            CODE_SIGNING_ALLOWED=NO

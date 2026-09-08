@@ -6,15 +6,18 @@ Native Mac tools for AI assistants.
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)](https://developer.apple.com/macos/)
 [![Swift 6+](https://img.shields.io/badge/Swift-6%2B-F05138?logo=swift&logoColor=white)](https://www.swift.org/)
 [![MCP](https://img.shields.io/badge/Protocol-MCP-555555)](https://modelcontextprotocol.io/)
+[![License](https://img.shields.io/github/license/thsnkhn/grove)](https://github.com/thsnkhn/grove/blob/main/LICENSE)
 [![Early development](https://img.shields.io/badge/Status-early_development-D4A017)](https://github.com/thsnkhn/grove)
 
-Grove is a small, local MCP server for macOS. It gives AI assistants access to Apple Calendar and Reminders through Swift and EventKit. More native Apple app integrations can follow.
+Grove is a small, local macOS menu bar app and MCP server. It gives AI assistants access to Apple Calendar and Reminders through Swift and EventKit. More native Apple app integrations can follow.
 
-Grove runs as one executable. It has no GUI, database, background service, network listener, or polling loop.
+Grove has one native menu bar surface. It has no database, network listener, or polling loop. The same app executable also supports the MCP stdio process started by an MCP client.
+
+Grove is free and open source under GPL-3.0.
 
 ## Current status
 
-The first working prototype is available. It supports Calendar and Reminders CRUD, common repeat schedules, time alarms, date filters, and local stdio MCP transport.
+The first working prototype is available. It supports Calendar and Reminders CRUD, common repeat schedules, time alarms, date filters, and local stdio MCP transport. The menu bar app controls which service groups the MCP process exposes.
 
 ## Features
 
@@ -32,11 +35,20 @@ Reminders tools:
 - Read, create, update, complete, reopen, and delete reminders.
 - Support due dates, priorities, recurrence, and alarms.
 
+Menu bar:
+
+- Use `tree.fill` as the Grove status icon.
+- Enable Calendar and Reminders independently.
+- Start Grove at login with the native macOS login-item service.
+- Quit Grove and its registered MCP processes together.
+- Open the releases page from **Check for Updates…**.
+
 The initial interface has 12 explicit tools. It does not include Calendar-list creation, Reminder-list creation, attendees, location alarms, native Reminders tags, sections, subtasks, or batch operations.
 
 ## Requirements
 
 - macOS 14 or later.
+- Xcode 16 or later for the Xcode project.
 - Swift 6 or later for source builds.
 - Calendar and Reminders access in System Settings.
 
@@ -44,41 +56,55 @@ Grove uses the [official Swift MCP SDK](https://github.com/modelcontextprotocol/
 
 ## Build
 
-```sh
-swift build
-swift test
-```
-
-Run the local executable:
+The Xcode project is the primary development entry point:
 
 ```sh
 ./script/build_and_run.sh doctor
-./script/build_and_run.sh --help
+./script/build_and_run.sh --verify
+
+# Open the menu bar app.
+./script/build_and_run.sh
+```
+
+Build or test directly with Xcode’s command-line tools:
+
+```sh
+xcodebuild -project Grove.xcodeproj \
+  -scheme Grove \
+  -configuration Debug \
+  -destination 'platform=macOS,arch=arm64' \
+  -derivedDataPath build/GroveDerivedData \
+  ARCHS=arm64 ONLY_ACTIVE_ARCH=YES CODE_SIGNING_ALLOWED=NO build
+
+swift test
 ```
 
 Request access before the first MCP connection:
 
 ```sh
-./.build/arm64-apple-macosx/debug/grove authorize
+./script/build_and_run.sh authorize
 ```
 
 The command requests full Calendar and Reminders access. If macOS does not show a prompt, open System Settings → Privacy & Security → Calendar or Reminders and enable Grove.
 
 ## MCP configuration
 
-Grove uses the MCP stdio transport. Point the client at the built executable:
+Grove uses the MCP stdio transport. Enable Calendar or Reminders in the menu bar first. Then point the client at the app executable:
 
 ```json
 {
   "mcpServers": {
     "grove": {
-      "command": "/absolute/path/to/grove/.build/arm64-apple-macosx/debug/grove"
+      "command": "/absolute/path/to/grove/build/GroveDerivedData/Build/Products/Debug/Grove.app/Contents/MacOS/Grove",
+      "args": ["--mcp"]
     }
   }
 }
 ```
 
-For a release build, use the executable inside the signed `Grove.app` bundle.
+For a release build, use `Grove.app/Contents/MacOS/Grove`. `Package.swift` remains available for lightweight SwiftPM builds and CI experiments.
+
+The menu bar app owns the local MCP process lifecycle. Each `--mcp` process registers with Grove. Quitting Grove sends those processes a termination signal and removes their leases.
 
 ## Date and scheduling rules
 
@@ -110,30 +136,50 @@ Example event input:
 ## Architecture
 
 ```text
-MCP client
-    │ stdio
-    ▼
-Grove · Swift executable
-    │ one EventKit store
-    ▼
+MCP client ── stdio ──▶ Grove.app/Contents/MacOS/Grove --mcp
+                              │ shared service settings
+Grove menu bar app ───────────┘
+        │ quit: terminate active MCP processes
+        ▼
 Calendar · Reminders
 ```
+
+The repository follows the normal Xcode command-line project shape:
+
+```text
+Grove.xcodeproj
+Grove/
+    GroveApp.swift
+    GroveMenuView.swift
+    GroveService.swift
+    GroveSettings.swift
+    GroveProcessRegistry.swift
+    Models.swift
+    EventKitStore.swift
+    MCPServer.swift
+    Info.plist
+GroveTests/
+    GroveTests.swift
+```
+
+The Xcode target is one menu bar application. The small test target remains SwiftPM-only.
 
 Grove reads current data on demand. It returns compact structured results and sends diagnostics to stderr. It does not keep a second copy of Calendar or Reminders data.
 
 ## Commands
 
 ```text
-grove                 Start the MCP server over stdio.
-grove authorize       Request Calendar and Reminders access.
-grove doctor          Show local permission and runtime status.
-grove --help          Show usage.
-grove --version       Show the version.
+Grove                 Open the menu bar app.
+Grove --mcp           Start the MCP server over stdio.
+Grove authorize      Request Calendar and Reminders access.
+Grove doctor         Show local permission and runtime status.
+Grove --help         Show usage.
+Grove --version      Show the version.
 ```
 
 ## Release
 
-The manual release script builds Apple Silicon and Intel binaries, creates a universal signed app bundle, notarizes it, staples the ticket, and writes a checksum.
+The manual release script builds Apple silicon and Intel-based Mac binaries, creates a universal signed app bundle, notarizes it, staples the ticket, and writes a checksum.
 
 ```sh
 DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \
@@ -144,6 +190,16 @@ NOTARYTOOL_PASSWORD="..." \
 ```
 
 The signing certificate and notarization values are required. The script stops when they are missing.
+
+## Contributing
+
+Feature requests and pull requests are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) for how to propose features and contribute implementation work.
+
+For private vulnerability reports, see [the security policy](.github/SECURITY.md).
+
+## License
+
+Grove is licensed under [GPL-3.0](LICENSE).
 
 ## Name
 

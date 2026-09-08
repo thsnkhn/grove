@@ -5,11 +5,19 @@
 	<key>CFBundleIdentifier</key>
 	<string>com.thsnkhn.grove</string>
 	<key>CFBundleExecutable</key>
-	<string>grove</string>
+	<string>Grove</string>
 	<key>CFBundleName</key>
 	<string>Grove</string>
+	<key>CFBundleDisplayName</key>
+	<string>Grove</string>
+	<key>CFBundleShortVersionString</key>
+	<string>$(MARKETING_VERSION)</string>
+	<key>CFBundleVersion</key>
+	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
+	<key>LSUIElement</key>
+	<true/>
 	<key>LSMinimumSystemVersion</key>
 	<string>14.0</string>
 	<key>NSCalendarsFullAccessUsageDescription</key>

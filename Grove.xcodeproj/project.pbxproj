@@ -1,0 +1,266 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000000000000000000090 /* GroveApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000010 /* GroveApp.swift */; };
+		A10000000000000000000091 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000011 /* Models.swift */; };
+		A10000000000000000000092 /* EventKitStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000012 /* EventKitStore.swift */; };
+		A10000000000000000000093 /* MCPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000013 /* MCPServer.swift */; };
+		A10000000000000000000094 /* GroveService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000015 /* GroveService.swift */; };
+		A10000000000000000000095 /* GroveSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000016 /* GroveSettings.swift */; };
+		A10000000000000000000096 /* GroveMenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000017 /* GroveMenuView.swift */; };
+		A10000000000000000000097 /* GroveProcessRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000018 /* GroveProcessRegistry.swift */; };
+		A10000000000000000000098 /* MCP in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000081 /* MCP */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A10000000000000000000010 /* GroveApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveApp.swift; sourceTree = "<group>"; };
+		A10000000000000000000011 /* Models.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		A10000000000000000000012 /* EventKitStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventKitStore.swift; sourceTree = "<group>"; };
+		A10000000000000000000013 /* MCPServer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MCPServer.swift; sourceTree = "<group>"; };
+		A10000000000000000000014 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A10000000000000000000015 /* GroveService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveService.swift; sourceTree = "<group>"; };
+		A10000000000000000000016 /* GroveSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveSettings.swift; sourceTree = "<group>"; };
+		A10000000000000000000017 /* GroveMenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveMenuView.swift; sourceTree = "<group>"; };
+		A10000000000000000000018 /* GroveProcessRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveProcessRegistry.swift; sourceTree = "<group>"; };
+		A10000000000000000000020 /* Grove.app */ = {isa = PBXFileReference; explicitFileType = "wrapper.application"; includeInIndex = 0; path = Grove.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A10000000000000000000041 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000098 /* MCP in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A10000000000000000000030 = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000031 /* Grove */,
+				A10000000000000000000033 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A10000000000000000000031 /* Grove */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000010 /* GroveApp.swift */,
+				A10000000000000000000011 /* Models.swift */,
+				A10000000000000000000012 /* EventKitStore.swift */,
+				A10000000000000000000013 /* MCPServer.swift */,
+				A10000000000000000000014 /* Info.plist */,
+				A10000000000000000000015 /* GroveService.swift */,
+				A10000000000000000000016 /* GroveSettings.swift */,
+				A10000000000000000000017 /* GroveMenuView.swift */,
+				A10000000000000000000018 /* GroveProcessRegistry.swift */,
+			);
+			path = Grove;
+			sourceTree = "<group>";
+		};
+		A10000000000000000000033 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A10000000000000000000020 /* Grove.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A10000000000000000000002 /* Grove */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A10000000000000000000061 /* Build configuration list for PBXNativeTarget "Grove" */;
+			buildPhases = (
+				A10000000000000000000040 /* Sources */,
+				A10000000000000000000041 /* Frameworks */,
+				A10000000000000000000042 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Grove;
+			packageProductDependencies = (
+				A10000000000000000000081 /* MCP */,
+			);
+			productName = Grove;
+			productReference = A10000000000000000000020 /* Grove.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A10000000000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 2660;
+				TargetAttributes = {
+					A10000000000000000000002 = {
+						CreatedOnToolsVersion = 26.6;
+					};
+				};
+			};
+			buildConfigurationList = A10000000000000000000060 /* Build configuration list for PBXProject "Grove" */;
+			compatibilityVersion = "Xcode 16.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A10000000000000000000030;
+			packageReferences = (
+				A10000000000000000000080 /* XCRemoteSwiftPackageReference "swift-sdk" */,
+			);
+			productRefGroup = A10000000000000000000033 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A10000000000000000000002 /* Grove */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A10000000000000000000042 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A10000000000000000000040 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000000000000000000090 /* GroveApp.swift in Sources */,
+				A10000000000000000000091 /* Models.swift in Sources */,
+				A10000000000000000000092 /* EventKitStore.swift in Sources */,
+				A10000000000000000000093 /* MCPServer.swift in Sources */,
+				A10000000000000000000094 /* GroveService.swift in Sources */,
+				A10000000000000000000095 /* GroveSettings.swift in Sources */,
+				A10000000000000000000096 /* GroveMenuView.swift in Sources */,
+				A10000000000000000000097 /* GroveProcessRegistry.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A10000000000000000000070 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A10000000000000000000071 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+		A10000000000000000000072 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Grove/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = com.thsnkhn.grove;
+				EXECUTABLE_NAME = Grove;
+				PRODUCT_MODULE_NAME = Grove;
+				PRODUCT_NAME = Grove;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Debug;
+		};
+		A10000000000000000000073 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGNING_ALLOWED = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Grove/Info.plist;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.thsnkhn.grove;
+				EXECUTABLE_NAME = Grove;
+				PRODUCT_MODULE_NAME = Grove;
+				PRODUCT_NAME = Grove;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 6.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A10000000000000000000060 /* Build configuration list for PBXProject "Grove" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000070 /* Debug */,
+				A10000000000000000000071 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A10000000000000000000061 /* Build configuration list for PBXNativeTarget "Grove" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A10000000000000000000072 /* Debug */,
+				A10000000000000000000073 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		A10000000000000000000080 /* XCRemoteSwiftPackageReference "swift-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/modelcontextprotocol/swift-sdk.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.11.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		A10000000000000000000081 /* MCP */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = A10000000000000000000080 /* XCRemoteSwiftPackageReference "swift-sdk" */;
+			productName = MCP;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = A10000000000000000000001 /* Project object */;
+}

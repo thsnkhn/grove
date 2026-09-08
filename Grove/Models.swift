@@ -8,13 +8,14 @@ enum GroveError: LocalizedError, Sendable {
     case invalidScheduling(String)
     case notFound(String)
     case permission(String)
+    case serviceDisabled(String)
     case eventKit(String)
 
     var errorDescription: String? {
         switch self {
         case .invalidArgument(let message), .missingArgument(let message), .invalidDate(let message),
              .invalidScheduling(let message), .notFound(let message), .permission(let message),
-             .eventKit(let message):
+             .serviceDisabled(let message), .eventKit(let message):
             return message
         }
     }

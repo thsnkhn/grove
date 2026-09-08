@@ -3,15 +3,18 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DIST_DIR="$ROOT_DIR/dist"
+PROJECT="$ROOT_DIR/Grove.xcodeproj"
+SCHEME="Grove"
+BUILD_ROOT="$ROOT_DIR/build/ReleaseDerivedData"
 APP_NAME="Grove"
-EXECUTABLE_NAME="grove"
+EXECUTABLE_NAME="Grove"
 APP_BUNDLE="$DIST_DIR/$APP_NAME.app"
 APP_BINARY="$APP_BUNDLE/Contents/MacOS/$EXECUTABLE_NAME"
-SOURCE_VERSION="$(sed -n 's/.*static let version = "\([^"]*\)".*/\1/p' "$ROOT_DIR/Sources/Grove/main.swift")"
+SOURCE_VERSION="$(sed -n 's/.*static let version = "\([^"]*\)".*/\1/p' "$ROOT_DIR/Grove/GroveApp.swift")"
 VERSION="${GROVE_VERSION:-$SOURCE_VERSION}"
 
 if [[ -z "$SOURCE_VERSION" || "$VERSION" != "$SOURCE_VERSION" ]]; then
-  echo "Release version must match Grove.version in Sources/Grove/main.swift." >&2
+  echo "Release version must match Grove.version in Grove/GroveApp.swift." >&2
   exit 1
 fi
 
@@ -20,21 +23,36 @@ fi
 : "${APPLE_TEAM_ID:?Set APPLE_TEAM_ID for notarization.}"
 : "${NOTARYTOOL_PASSWORD:?Set NOTARYTOOL_PASSWORD for notarization.}"
 
-rm -rf "$APP_BUNDLE" "$DIST_DIR/Grove-$VERSION.zip" "$DIST_DIR/SHA256SUMS"
-mkdir -p "$APP_BUNDLE/Contents/MacOS"
+rm -rf "$APP_BUNDLE" "$BUILD_ROOT" "$DIST_DIR/Grove-$VERSION.zip" "$DIST_DIR/SHA256SUMS"
+mkdir -p "$DIST_DIR"
 
-swift build -c release --arch arm64
-ARM_BINARY="$(swift build -c release --arch arm64 --show-bin-path)/$EXECUTABLE_NAME"
+build_arch() {
+  local arch="$1"
+  xcodebuild \
+    -project "$PROJECT" \
+    -scheme "$SCHEME" \
+    -configuration Release \
+    -destination "platform=macOS,arch=$arch" \
+    -derivedDataPath "$BUILD_ROOT/$arch" \
+    -sdk macosx \
+    ARCHS="$arch" \
+    ONLY_ACTIVE_ARCH=YES \
+    MARKETING_VERSION="$VERSION" \
+    CURRENT_PROJECT_VERSION="$VERSION" \
+    CODE_SIGNING_ALLOWED=NO \
+    build
+}
 
-swift build -c release --arch x86_64
-X86_BINARY="$(swift build -c release --arch x86_64 --show-bin-path)/$EXECUTABLE_NAME"
+build_arch arm64
+ARM_APP="$BUILD_ROOT/arm64/Build/Products/Release/$APP_NAME.app"
+ARM_BINARY="$ARM_APP/Contents/MacOS/$EXECUTABLE_NAME"
 
+build_arch x86_64
+X86_APP="$BUILD_ROOT/x86_64/Build/Products/Release/$APP_NAME.app"
+X86_BINARY="$X86_APP/Contents/MacOS/$EXECUTABLE_NAME"
+
+ditto "$ARM_APP" "$APP_BUNDLE"
 lipo -create "$ARM_BINARY" "$X86_BINARY" -output "$APP_BINARY"
-cp "$ROOT_DIR/Support/Info.plist" "$APP_BUNDLE/Contents/Info.plist"
-
-/usr/libexec/PlistBuddy -c "Set :CFBundleExecutable $EXECUTABLE_NAME" "$APP_BUNDLE/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Add :CFBundleShortVersionString string $VERSION" "$APP_BUNDLE/Contents/Info.plist"
-/usr/libexec/PlistBuddy -c "Add :CFBundleVersion string $VERSION" "$APP_BUNDLE/Contents/Info.plist"
 
 codesign --force --options runtime --timestamp --sign "$DEVELOPER_ID_APPLICATION" "$APP_BUNDLE"
 codesign --verify --deep --strict "$APP_BUNDLE"

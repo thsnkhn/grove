@@ -6,6 +6,7 @@
 xcuserdata/
 *.xcuserstate
 DerivedData/
+build/
 dist/
 
 # macOS

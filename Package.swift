@@ -8,7 +8,7 @@ let package = Package(
         .macOS(.v14)
     ],
     products: [
-        .executable(name: "grove", targets: ["Grove"])
+        .executable(name: "Grove", targets: ["Grove"])
     ],
     dependencies: [
         .package(url: "https://github.com/modelcontextprotocol/swift-sdk.git", from: "0.11.0")
@@ -20,6 +20,7 @@ let package = Package(
                 .product(name: "MCP", package: "swift-sdk")
             ],
             path: "Grove",
+            exclude: ["Info.plist"],
             linkerSettings: [
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate",
