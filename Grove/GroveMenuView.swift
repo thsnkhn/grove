@@ -4,6 +4,7 @@ import SwiftUI
 struct GroveMenuView: View {
     @ObservedObject var settings: GroveSettings
     @ObservedObject var updater: GroveUpdater
+    @State private var showsOptions = false
 
     private let columns = Array(
         repeating: GridItem(.flexible(), spacing: 10),
@@ -12,7 +13,7 @@ struct GroveMenuView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            header
+            settingsHeader
 
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(GroveService.allCases) { service in
@@ -45,42 +46,78 @@ struct GroveMenuView: View {
         .frame(width: 304)
     }
 
-    private var header: some View {
-        HStack {
-            Text("Grove")
-                .font(.title3.weight(.semibold))
-
-            Spacer()
-
-            Menu {
-                Toggle("Launch at Login", isOn: Binding(
-                    get: { settings.launchAtLogin },
-                    set: { settings.setLaunchAtLogin($0) }
-                ))
-
-                #if canImport(Sparkle)
-                Button(updater.updateAvailable ? "Update Available…" : "Check for Updates…") {
-                    updater.checkForUpdates()
-                }
-                .disabled(!updater.canCheckForUpdates)
-                #endif
-
-                Divider()
-
-                Button("Quit Grove") {
-                    NSApplication.shared.terminate(nil)
+    private var settingsHeader: some View {
+        VStack(spacing: 12) {
+            Button {
+                withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
+                    showsOptions.toggle()
                 }
             } label: {
-                Image(systemName: "ellipsis.circle")
-                    .font(.title3)
-                    .symbolRenderingMode(.hierarchical)
+                HStack {
+                    Text("Grove")
+                        .font(.title3.weight(.semibold))
+
+                    Spacer()
+
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                        .rotationEffect(.degrees(showsOptions ? 90 : 0))
+                }
+                .contentShape(Rectangle())
             }
-            .menuStyle(.borderlessButton)
-            .menuIndicator(.hidden)
-            .fixedSize()
-            .help("Grove options")
+            .buttonStyle(.plain)
+            .help(showsOptions ? "Hide Grove options" : "Show Grove options")
             .accessibilityLabel("Grove options")
+            .accessibilityValue(showsOptions ? "Expanded" : "Collapsed")
+
+            if showsOptions {
+                options
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
         }
+    }
+
+    private var options: some View {
+        VStack(spacing: 0) {
+            Toggle("Launch at Login", isOn: Binding(
+                get: { settings.launchAtLogin },
+                set: { settings.setLaunchAtLogin($0) }
+            ))
+            .toggleStyle(.switch)
+            .padding(.vertical, 8)
+
+            Divider()
+
+            #if canImport(Sparkle)
+            optionButton(updater.updateAvailable ? "Update Available…" : "Check for Updates…") {
+                updater.checkForUpdates()
+            }
+            .disabled(!updater.canCheckForUpdates)
+            #endif
+
+            Divider()
+
+            optionButton("Quit Grove", role: .destructive) {
+                NSApplication.shared.terminate(nil)
+            }
+        }
+    }
+
+    private func optionButton(
+        _ title: String,
+        role: ButtonRole? = nil,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(role: role, action: action) {
+            HStack {
+                Text(title)
+                Spacer()
+            }
+            .contentShape(Rectangle())
+            .padding(.vertical, 8)
+        }
+        .buttonStyle(.plain)
     }
 
     private func color(for service: GroveService) -> Color {

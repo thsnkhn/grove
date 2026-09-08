@@ -40,6 +40,7 @@ Menu bar:
 - Use `tree.circle.fill` as the Grove status icon.
 - Enable Calendar and Reminders from a native three-column tool grid.
 - Preview planned Apple integrations as disabled **Soon** tiles.
+- Expand Grove options inline without hiding the tool grid.
 - Start Grove at login with the native macOS login-item service.
 - Quit Grove and its registered MCP processes together.
 - Check for updates with Sparkle from **Check for Updates…**.
