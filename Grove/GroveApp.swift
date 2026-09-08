@@ -78,7 +78,7 @@ struct GroveApp: App {
     @StateObject private var updater = GroveUpdater()
 
     var body: some Scene {
-        MenuBarExtra("Grove", systemImage: "tree.circle.fill") {
+        MenuBarExtra("Grove", systemImage: "tree.fill") {
             GroveMenuView(settings: settings, updater: updater)
         }
         .menuBarExtraStyle(.window)

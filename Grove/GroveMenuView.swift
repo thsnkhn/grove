@@ -6,18 +6,13 @@ struct GroveMenuView: View {
     @ObservedObject var updater: GroveUpdater
     @State private var showsOptions = false
 
-    private let columns = Array(
-        repeating: GridItem(.flexible(), spacing: 10),
-        count: 3
-    )
-
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             settingsHeader
 
-            LazyVGrid(columns: columns, spacing: 20) {
+            LazyVStack(spacing: 0) {
                 ForEach(GroveService.allCases) { service in
-                    ServiceTile(
+                    ServiceRow(
                         title: service.title,
                         symbolName: settings.isEnabled(service)
                             ? service.filledSymbolName
@@ -31,7 +26,7 @@ struct GroveMenuView: View {
                 }
 
                 ForEach(ComingSoonTool.all) { tool in
-                    ServiceTile(
+                    ServiceRow(
                         title: tool.title,
                         symbolName: tool.symbolName,
                         status: "Soon",
@@ -129,7 +124,7 @@ struct GroveMenuView: View {
 
 }
 
-private struct ServiceTile: View {
+private struct ServiceRow: View {
     let title: String
     let symbolName: String
     let status: String
@@ -141,7 +136,7 @@ private struct ServiceTile: View {
         Button {
             action?()
         } label: {
-            VStack(spacing: 6) {
+            HStack(spacing: 12) {
                 ZStack {
                     Circle()
                         .fill(isEnabled ? Color.white.opacity(0.94) : Color.secondary.opacity(0.32))
@@ -153,17 +148,17 @@ private struct ServiceTile: View {
                 }
                 .frame(width: 32, height: 32)
 
-                VStack(spacing: 2) {
-                    Text(title)
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(action == nil ? .secondary : .primary)
+                Text(title)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(action == nil ? .secondary : .primary)
 
-                    Text(status)
-                        .font(.system(size: 12))
-                        .foregroundStyle(.secondary)
-                }
+                Spacer(minLength: 8)
+
+                Text(status)
+                    .font(.system(size: 14))
+                    .foregroundStyle(.secondary)
             }
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, minHeight: 44, alignment: .leading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
