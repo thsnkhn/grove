@@ -5,96 +5,146 @@ struct GroveMenuView: View {
     @ObservedObject var settings: GroveSettings
     @ObservedObject var updater: GroveUpdater
 
+    private let columns = Array(
+        repeating: GridItem(.flexible(), spacing: 10),
+        count: 3
+    )
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            HStack {
-                Text("Grove")
-                    .font(.headline)
+        VStack(alignment: .leading, spacing: 16) {
+            header
 
-                Spacer(minLength: 0)
-
-                Circle()
-                    .fill(settings.enabledServices.isEmpty ? Color.secondary : Color.green)
-                    .frame(width: 7, height: 7)
-                    .accessibilityLabel(settings.enabledServices.isEmpty ? "MCP disabled" : "MCP enabled")
-            }
-            .padding(.horizontal, 8)
-            .padding(.vertical, 7)
-
-            Divider()
-
-            VStack(spacing: 2) {
+            LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(GroveService.allCases) { service in
-                    Toggle(isOn: binding(for: service)) {
-                        Label(service.title, systemImage: service.symbolName)
+                    ServiceTile(
+                        title: service.title,
+                        symbolName: settings.isEnabled(service)
+                            ? service.filledSymbolName
+                            : service.outlineSymbolName,
+                        status: settings.isEnabled(service) ? "On" : "Off",
+                        color: color(for: service),
+                        isEnabled: settings.isEnabled(service)
+                    ) {
+                        settings.setEnabled(!settings.isEnabled(service), for: service)
                     }
-                    .toggleStyle(.switch)
-                    .controlSize(.small)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
                 }
 
-                Toggle(isOn: loginBinding) {
-                    Text("Launch at Login")
+                ForEach(ComingSoonTool.all) { tool in
+                    ServiceTile(
+                        title: tool.title,
+                        symbolName: tool.symbolName,
+                        status: "Soon",
+                        color: .secondary,
+                        isEnabled: false,
+                        action: nil
+                    )
                 }
-                .toggleStyle(.switch)
-                .controlSize(.small)
-                .padding(.horizontal, 8)
-                .padding(.vertical, 4)
             }
-            .padding(.vertical, 5)
-
-            Divider()
-
-            #if canImport(Sparkle)
-            Toggle("Automatically Check for Updates", isOn: Binding(
-                get: { updater.automaticallyChecksForUpdates },
-                set: { updater.setAutomaticallyChecksForUpdates($0) }
-            ))
-            .toggleStyle(.switch)
-            .controlSize(.small)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
-
-            Button {
-                updater.checkForUpdates()
-            } label: {
-                Label(updater.updateAvailable ? "Update Available…" : "Check for Updates…", systemImage: "sparkles")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(.borderless)
-            .disabled(!updater.canCheckForUpdates)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
-
-            Divider()
-            #endif
-
-            Button {
-                NSApplication.shared.terminate(nil)
-            } label: {
-                Label("Quit Grove", systemImage: "power")
-                    .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .buttonStyle(.borderless)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 6)
         }
-        .frame(width: 260)
-        .padding(.vertical, 5)
+        .padding(16)
+        .frame(width: 304)
     }
 
-    private func binding(for service: GroveService) -> Binding<Bool> {
-        Binding(
-            get: { settings.isEnabled(service) },
-            set: { settings.setEnabled($0, for: service) }
-        )
+    private var header: some View {
+        HStack {
+            Text("Grove")
+                .font(.title3.weight(.semibold))
+
+            Spacer()
+
+            Menu {
+                Toggle("Launch at Login", isOn: Binding(
+                    get: { settings.launchAtLogin },
+                    set: { settings.setLaunchAtLogin($0) }
+                ))
+
+                #if canImport(Sparkle)
+                Button(updater.updateAvailable ? "Update Available…" : "Check for Updates…") {
+                    updater.checkForUpdates()
+                }
+                .disabled(!updater.canCheckForUpdates)
+                #endif
+
+                Divider()
+
+                Button("Quit Grove") {
+                    NSApplication.shared.terminate(nil)
+                }
+            } label: {
+                Image(systemName: "ellipsis.circle")
+                    .font(.title3)
+                    .symbolRenderingMode(.hierarchical)
+            }
+            .menuStyle(.borderlessButton)
+            .menuIndicator(.hidden)
+            .fixedSize()
+            .help("Grove options")
+            .accessibilityLabel("Grove options")
+        }
     }
 
-    private var loginBinding: Binding<Bool> {
-        Binding(
-            get: { settings.launchAtLogin },
-            set: { settings.setLaunchAtLogin($0) }
-        )
+    private func color(for service: GroveService) -> Color {
+        switch service {
+        case .calendar: return .red
+        case .reminders: return .blue
+        }
     }
+
+}
+
+private struct ServiceTile: View {
+    let title: String
+    let symbolName: String
+    let status: String
+    let color: Color
+    let isEnabled: Bool
+    let action: (() -> Void)?
+
+    var body: some View {
+        Button {
+            action?()
+        } label: {
+            VStack(spacing: 6) {
+                ZStack {
+                    Circle()
+                        .fill(isEnabled ? Color.white.opacity(0.94) : Color.secondary.opacity(0.32))
+
+                    Image(systemName: symbolName)
+                        .font(.system(size: 19, weight: .medium))
+                        .symbolRenderingMode(.hierarchical)
+                        .foregroundStyle(isEnabled ? color : Color.white.opacity(0.88))
+                }
+                .frame(width: 36, height: 36)
+
+                VStack(spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundStyle(action == nil ? .secondary : .primary)
+
+                    Text(status)
+                        .font(.system(size: 11))
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .disabled(action == nil)
+        .accessibilityLabel("\(title), \(status)")
+    }
+}
+
+private struct ComingSoonTool: Identifiable {
+    let title: String
+    let symbolName: String
+
+    var id: String { title }
+
+    static let all = [
+        ComingSoonTool(title: "Mail", symbolName: "envelope"),
+        ComingSoonTool(title: "Notes", symbolName: "note.text"),
+        ComingSoonTool(title: "Messages", symbolName: "message"),
+        ComingSoonTool(title: "Contacts", symbolName: "person.2")
+    ]
 }

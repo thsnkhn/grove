@@ -13,7 +13,14 @@ enum GroveService: String, CaseIterable, Hashable, Identifiable, Sendable {
         }
     }
 
-    var symbolName: String {
+    var outlineSymbolName: String {
+        switch self {
+        case .calendar: return "calendar"
+        case .reminders: return "list.bullet"
+        }
+    }
+
+    var filledSymbolName: String {
         switch self {
         case .calendar: return "calendar"
         case .reminders: return "checklist"

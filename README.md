@@ -37,12 +37,13 @@ Reminders tools:
 
 Menu bar:
 
-- Use `tree.fill` as the Grove status icon.
-- Enable Calendar and Reminders independently.
+- Use `tree.circle.fill` as the Grove status icon.
+- Enable Calendar and Reminders from a native three-column tool grid.
+- Preview planned Apple integrations as disabled **Soon** tiles.
 - Start Grove at login with the native macOS login-item service.
 - Quit Grove and its registered MCP processes together.
 - Check for updates with Sparkle from **Check for Updates…**.
-- Check automatically by default, with a switch to turn checks off.
+- Check automatically for updates with Sparkle.
 
 The initial interface has 12 explicit tools. It does not include Calendar-list creation, Reminder-list creation, attendees, location alarms, native Reminders tags, sections, subtasks, or batch operations.
 
@@ -196,8 +197,8 @@ The signing certificate and notarization values are required. The script stops w
 ### Updates
 
 Sparkle checks [the appcast](https://thsnkhn.github.io/grove/appcast.xml) automatically
-while the menu bar app runs. Checks default to on. Users can turn them off in the
-menu bar. An available update changes the menu item to **Update Available…**.
+while the menu bar app runs. Checks default to on. An available update changes
+the menu item to **Update Available…**.
 Sparkle asks before installing an update. Headless MCP commands do not
 start the updater. SwiftPM builds omit Sparkle to keep the lightweight build small.
 
