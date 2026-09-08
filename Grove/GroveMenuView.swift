@@ -42,7 +42,7 @@ struct GroveMenuView: View {
     }
 
     private var settingsHeader: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 16) {
             Button {
                 withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
                     showsOptions.toggle()
@@ -75,12 +75,24 @@ struct GroveMenuView: View {
 
     private var options: some View {
         VStack(spacing: 0) {
-            Toggle("Launch at Login", isOn: Binding(
-                get: { settings.launchAtLogin },
-                set: { settings.setLaunchAtLogin($0) }
-            ))
-            .toggleStyle(.switch)
-            .padding(.vertical, 8)
+            HStack(spacing: 10) {
+                Spacer()
+
+                Text("Launch at Login")
+                    .font(.system(size: 14))
+
+                Toggle("", isOn: Binding(
+                    get: { settings.launchAtLogin },
+                    set: { settings.setLaunchAtLogin($0) }
+                ))
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.small)
+                .accessibilityLabel("Launch at Login")
+
+                Spacer()
+            }
+            .frame(height: 40)
 
             Divider()
 
@@ -107,10 +119,11 @@ struct GroveMenuView: View {
         Button(role: role, action: action) {
             HStack {
                 Text(title)
+                    .font(.system(size: 14))
                 Spacer()
             }
             .contentShape(Rectangle())
-            .padding(.vertical, 8)
+            .frame(maxWidth: .infinity, minHeight: 40, alignment: .leading)
         }
         .buttonStyle(.plain)
     }
