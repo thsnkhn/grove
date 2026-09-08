@@ -130,8 +130,8 @@ struct GroveMenuView: View {
 
     private func color(for service: GroveService) -> Color {
         switch service {
-        case .calendar: return .red
-        case .reminders: return .blue
+        case .calendar: return Color(nsColor: .systemRed)
+        case .reminders: return Color(nsColor: .systemBlue)
         }
     }
 
@@ -152,12 +152,14 @@ private struct ServiceRow: View {
             HStack(spacing: 10) {
                 ZStack {
                     Circle()
-                        .fill(isEnabled ? Color.white.opacity(0.94) : Color.secondary.opacity(0.32))
+                        .fill(isEnabled
+                            ? Color(nsColor: .controlColor)
+                            : Color(nsColor: .controlBackgroundColor))
 
                     Image(systemName: symbolName)
                         .font(.system(size: 14, weight: .medium))
-                        .symbolRenderingMode(.hierarchical)
-                        .foregroundStyle(isEnabled ? color : Color.white.opacity(0.88))
+                        .symbolRenderingMode(.monochrome)
+                        .foregroundStyle(isEnabled ? color : Color(nsColor: .secondaryLabelColor))
                 }
                 .frame(width: 26, height: 26)
 
