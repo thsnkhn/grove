@@ -147,11 +147,11 @@ private struct ServiceTile: View {
                         .fill(isEnabled ? Color.white.opacity(0.94) : Color.secondary.opacity(0.32))
 
                     Image(systemName: symbolName)
-                        .font(.system(size: 19, weight: .medium))
+                        .font(.system(size: 17, weight: .medium))
                         .symbolRenderingMode(.hierarchical)
                         .foregroundStyle(isEnabled ? color : Color.white.opacity(0.88))
                 }
-                .frame(width: 36, height: 36)
+                .frame(width: 32, height: 32)
 
                 VStack(spacing: 2) {
                     Text(title)
