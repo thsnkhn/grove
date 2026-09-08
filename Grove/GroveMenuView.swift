@@ -76,10 +76,11 @@ struct GroveMenuView: View {
     private var options: some View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
-                Spacer()
-
                 Text("Launch at Login")
                     .font(.system(size: 14))
+                    .foregroundStyle(.primary)
+
+                Spacer(minLength: 8)
 
                 Toggle("", isOn: Binding(
                     get: { settings.launchAtLogin },
@@ -89,8 +90,6 @@ struct GroveMenuView: View {
                 .toggleStyle(.switch)
                 .controlSize(.small)
                 .accessibilityLabel("Launch at Login")
-
-                Spacer()
             }
             .frame(height: 32)
 
@@ -156,8 +155,8 @@ private struct ServiceRow: View {
                 ZStack {
                     Circle()
                         .fill(isEnabled
-                            ? Color(red: 0.96, green: 0.96, blue: 0.97)
-                            : Color(red: 0.38, green: 0.38, blue: 0.40))
+                            ? Color(nsColor: .textBackgroundColor).opacity(0.94)
+                            : Color(nsColor: .tertiarySystemFill))
 
                     Image(systemName: symbolName)
                         .font(.system(size: 14, weight: .medium))
@@ -168,13 +167,17 @@ private struct ServiceRow: View {
 
                 Text(title)
                     .font(.system(size: 14, weight: .regular))
-                    .foregroundStyle(action == nil ? Color.secondary.opacity(0.65) : .primary)
+                    .foregroundStyle(action == nil
+                        ? Color(nsColor: .tertiaryLabelColor)
+                        : .primary)
 
                 Spacer(minLength: 8)
 
                 Text(status)
                     .font(.system(size: 12))
-                    .foregroundStyle(action == nil ? Color.secondary.opacity(0.65) : .secondary)
+                    .foregroundStyle(action == nil
+                        ? Color(nsColor: .tertiaryLabelColor)
+                        : .secondary)
             }
             .frame(maxWidth: .infinity, minHeight: 32, alignment: .leading)
             .contentShape(Rectangle())
