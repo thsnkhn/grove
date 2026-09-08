@@ -179,21 +179,30 @@ AppKit only where macOS behavior requires it.
 Do not release from an uncommitted or mixed worktree. Release signing remains a
 manual, credentialed operation.
 
-Prepare a release with:
+Submit a first notarization without waiting for Apple:
 
 ```sh
 DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \
-APPLE_ID="..." \
-APPLE_TEAM_ID="..." \
-NOTARYTOOL_PASSWORD="..." \
+NOTARY_PROFILE="XCode Notary" \
 RELEASE_NOTES_FILE="docs/releases/0.1.0.md" \
-./script/release-sparkle.sh 0.1.0 2
+WAIT_FOR_NOTARIZATION=NO ./script/release-sparkle.sh 0.1.0 1
 ```
 
 The script checks the version, build number, notes, and worktree. It builds an
-arm64/x86_64 app, signs Sparkle, notarizes and staples the app, generates a
-signed appcast, creates a signed Git tag, publishes GitHub Release assets, and
-starts the GitHub Pages deployment.
+arm64/x86_64 app, signs Sparkle, submits the archive, and records the Apple
+request in `dist/notarization.json`. It does not publish an unnotarized app.
+
+Check and finalize the release after Apple accepts it:
+
+```sh
+NOTARY_PROFILE="XCode Notary" ./script/check_notarization.sh
+NOTARY_PROFILE="XCode Notary" ./script/finalize_notarization.sh
+PREPARED_RELEASE=YES RELEASE_NOTES_FILE="docs/releases/0.1.0.md" \
+  ./script/release-sparkle.sh 0.1.0 1
+```
+
+The final release step creates a signed Git tag, publishes GitHub Release
+assets, and starts the GitHub Pages deployment.
 
 Required private values must stay outside the repository:
 

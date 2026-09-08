@@ -13,6 +13,8 @@ APP_BINARY="$APP_BUNDLE/Contents/MacOS/$EXECUTABLE_NAME"
 SOURCE_VERSION="$(sed -n 's/.*static let version = "\([^"]*\)".*/\1/p' "$ROOT_DIR/Grove/GroveApp.swift")"
 VERSION="${GROVE_VERSION:-$SOURCE_VERSION}"
 BUILD_NUMBER="${GROVE_BUILD_NUMBER:?Set GROVE_BUILD_NUMBER to an increasing positive integer.}"
+WAIT_FOR_NOTARIZATION="${WAIT_FOR_NOTARIZATION:-YES}"
+NOTARY_PROFILE="${NOTARY_PROFILE:-XCode Notary}"
 [[ "$BUILD_NUMBER" =~ ^[1-9][0-9]*$ ]] || { echo "Invalid build number." >&2; exit 1; }
 
 if [[ -z "$SOURCE_VERSION" || "$VERSION" != "$SOURCE_VERSION" ]]; then
@@ -21,11 +23,23 @@ if [[ -z "$SOURCE_VERSION" || "$VERSION" != "$SOURCE_VERSION" ]]; then
 fi
 
 : "${DEVELOPER_ID_APPLICATION:?Set DEVELOPER_ID_APPLICATION to your Developer ID Application identity.}"
-: "${APPLE_ID:?Set APPLE_ID for notarization.}"
-: "${APPLE_TEAM_ID:?Set APPLE_TEAM_ID for notarization.}"
-: "${NOTARYTOOL_PASSWORD:?Set NOTARYTOOL_PASSWORD for notarization.}"
 
-rm -rf "$APP_BUNDLE" "$BUILD_ROOT" "$DIST_DIR/Grove-$VERSION.zip" "$DIST_DIR/SHA256SUMS"
+if [[ -n "$NOTARY_PROFILE" ]]; then
+  NOTARY_ARGS=(--keychain-profile "$NOTARY_PROFILE")
+else
+  : "${APPLE_ID:?Set APPLE_ID for notarization when NOTARY_PROFILE is empty.}"
+  : "${APPLE_TEAM_ID:?Set APPLE_TEAM_ID for notarization when NOTARY_PROFILE is empty.}"
+  : "${NOTARYTOOL_PASSWORD:?Set NOTARYTOOL_PASSWORD for notarization when NOTARY_PROFILE is empty.}"
+  NOTARY_ARGS=(
+    --apple-id "$APPLE_ID"
+    --team-id "$APPLE_TEAM_ID"
+    --password "$NOTARYTOOL_PASSWORD"
+  )
+fi
+
+NOTARIZATION_RECORD="$DIST_DIR/notarization.json"
+
+rm -rf "$APP_BUNDLE" "$BUILD_ROOT" "$DIST_DIR/Grove-$VERSION.zip" "$DIST_DIR/SHA256SUMS" "$NOTARIZATION_RECORD"
 mkdir -p "$DIST_DIR"
 
 build_arch() {
@@ -71,11 +85,16 @@ codesign --verify --deep --strict "$APP_BUNDLE"
 
 ZIP_PATH="$DIST_DIR/Grove-$VERSION.zip"
 ditto -c -k --keepParent "$APP_BUNDLE" "$ZIP_PATH"
-xcrun notarytool submit "$ZIP_PATH" \
-  --apple-id "$APPLE_ID" \
-  --team-id "$APPLE_TEAM_ID" \
-  --password "$NOTARYTOOL_PASSWORD" \
-  --wait
+
+if [[ "$WAIT_FOR_NOTARIZATION" == "YES" ]]; then
+  xcrun notarytool submit "$ZIP_PATH" "${NOTARY_ARGS[@]}" --wait
+else
+  xcrun notarytool submit "$ZIP_PATH" "${NOTARY_ARGS[@]}" \
+    --output-format json > "$NOTARIZATION_RECORD"
+  echo "Notarization submitted. Request: $NOTARIZATION_RECORD"
+  exit 0
+fi
+
 xcrun stapler staple "$APP_BUNDLE"
 xcrun stapler validate "$APP_BUNDLE"
 # Recreate the archive so the downloaded app includes the notarization ticket.

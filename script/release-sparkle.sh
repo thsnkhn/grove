@@ -15,6 +15,8 @@ RELEASE_TAG="v$VERSION"
 ZIP_PATH="$ROOT_DIR/dist/Grove-$VERSION.zip"
 CHECKSUM_PATH="$ROOT_DIR/dist/SHA256SUMS"
 APPCAST_PATH="$ROOT_DIR/dist/appcast.xml"
+WAIT_FOR_NOTARIZATION="${WAIT_FOR_NOTARIZATION:-YES}"
+PREPARED_RELEASE="${PREPARED_RELEASE:-NO}"
 
 usage() {
   echo "Usage: RELEASE_NOTES_FILE=<path> $0 <version> <build-number>" >&2
@@ -49,8 +51,25 @@ if ! git diff --quiet || ! git diff --cached --quiet || [[ -n "$(git ls-files --
   exit 1
 fi
 
-echo "Preparing Grove $VERSION ($BUILD_NUMBER)..."
-GROVE_VERSION="$VERSION" GROVE_BUILD_NUMBER="$BUILD_NUMBER" "$ROOT_DIR/script/package_release.sh"
+if [[ "$PREPARED_RELEASE" == "YES" ]]; then
+  echo "Using prepared Grove $VERSION ($BUILD_NUMBER) artifacts."
+  APP_VERSION="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' "$ROOT_DIR/dist/Grove.app/Contents/Info.plist" 2>/dev/null || true)"
+  APP_BUILD="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleVersion' "$ROOT_DIR/dist/Grove.app/Contents/Info.plist" 2>/dev/null || true)"
+  [[ "$APP_VERSION" == "$VERSION" && "$APP_BUILD" == "$BUILD_NUMBER" ]] || {
+    echo "Prepared app version/build does not match $VERSION ($BUILD_NUMBER)." >&2
+    exit 1
+  }
+else
+  echo "Preparing Grove $VERSION ($BUILD_NUMBER)..."
+  GROVE_VERSION="$VERSION" GROVE_BUILD_NUMBER="$BUILD_NUMBER" \
+    WAIT_FOR_NOTARIZATION="$WAIT_FOR_NOTARIZATION" \
+    "$ROOT_DIR/script/package_release.sh"
+
+  if [[ "$WAIT_FOR_NOTARIZATION" == "NO" ]]; then
+    echo "Notarization is pending. Run script/check_notarization.sh later."
+    exit 0
+  fi
+fi
 
 for artifact in "$ZIP_PATH" "$CHECKSUM_PATH" "$APPCAST_PATH"; do
   [[ -f "$artifact" ]] || { echo "Missing release artifact: $artifact" >&2; exit 1; }
