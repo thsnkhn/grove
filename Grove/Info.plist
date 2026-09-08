@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleIdentifier</key>
+	<string>com.thsnkhn.grove</string>
+	<key>CFBundleExecutable</key>
+	<string>grove</string>
+	<key>CFBundleName</key>
+	<string>Grove</string>
+	<key>CFBundlePackageType</key>
+	<string>APPL</string>
+	<key>LSMinimumSystemVersion</key>
+	<string>14.0</string>
+	<key>NSCalendarsFullAccessUsageDescription</key>
+	<string>Grove needs Calendar access to read and manage your events.</string>
+	<key>NSRemindersFullAccessUsageDescription</key>
+	<string>Grove needs Reminders access to read and manage your reminders.</string>
+</dict>
+</plist>

@@ -6,6 +6,7 @@
 xcuserdata/
 *.xcuserstate
 DerivedData/
+dist/
 
 # macOS
 .DS_Store
