@@ -155,11 +155,11 @@ private struct ServiceTile: View {
 
                 VStack(spacing: 2) {
                     Text(title)
-                        .font(.system(size: 12, weight: .semibold))
+                        .font(.system(size: 13, weight: .semibold))
                         .foregroundStyle(action == nil ? .secondary : .primary)
 
                     Text(status)
-                        .font(.system(size: 11))
+                        .font(.system(size: 12))
                         .foregroundStyle(.secondary)
                 }
             }
