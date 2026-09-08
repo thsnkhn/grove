@@ -13,6 +13,7 @@ dist/
 .DS_Store
 
 # Local configuration and credentials
+.codex/
 .env
 .env.*
 !.env.example

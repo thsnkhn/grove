@@ -182,18 +182,26 @@ Grove --version      Show the version.
 
 ## Release
 
-The manual release script builds Apple silicon and Intel-based Mac binaries, creates a universal signed app bundle, notarizes it, staples the ticket, and writes a checksum.
+The release flow follows Harbor's guarded local process. One command checks the
+working tree, builds a universal app, signs and notarizes it, creates a signed
+tag, publishes the GitHub Release, and deploys the new appcast to GitHub Pages.
 
 ```sh
 DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \
-GROVE_BUILD_NUMBER="2" \
 APPLE_ID="..." \
 APPLE_TEAM_ID="..." \
 NOTARYTOOL_PASSWORD="..." \
-./script/package_release.sh
+RELEASE_NOTES_FILE="docs/releases/0.1.0.md" \
+./script/release-sparkle.sh 0.1.0 2
 ```
 
-The signing certificate and notarization values are required. The script stops when they are missing.
+The signing certificate, notarization values, release notes, clean working tree,
+and matching `Grove.version` are required. The script stops before publication
+when a prerequisite is missing. A rerun can resume an existing release only when
+its signed tag points to the current commit.
+
+`script/package_release.sh` remains the lower-level packaging command for local
+artifact preparation and CI.
 
 ### Updates
 
