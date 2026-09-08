@@ -4,7 +4,7 @@ Native Mac tools for AI assistants.
 
 [![CI](https://github.com/thsnkhn/grove/actions/workflows/ci.yml/badge.svg)](https://github.com/thsnkhn/grove/actions/workflows/ci.yml)
 [![macOS 14+](https://img.shields.io/badge/macOS-14%2B-000000?logo=apple&logoColor=white)](https://developer.apple.com/macos/)
-[![Swift 6+](https://img.shields.io/badge/Swift-6%2B-F05138?logo=swift&logoColor=white)](https://www.swift.org/)
+[![Swift 6.2+](https://img.shields.io/badge/Swift-6.2%2B-F05138?logo=swift&logoColor=white)](https://www.swift.org/)
 [![MCP](https://img.shields.io/badge/Protocol-MCP-555555)](https://modelcontextprotocol.io/)
 [![License](https://img.shields.io/github/license/thsnkhn/grove)](https://github.com/thsnkhn/grove/blob/main/LICENSE)
 [![Early development](https://img.shields.io/badge/Status-early_development-D4A017)](https://github.com/thsnkhn/grove)
@@ -49,8 +49,8 @@ The initial interface has 12 explicit tools. It does not include Calendar-list c
 ## Requirements
 
 - macOS 14 or later.
-- Xcode 16 or later for the Xcode project.
-- Swift 6 or later for source builds.
+- Xcode 26 or later for the Xcode project.
+- Swift 6.2 or later for source builds and the locked dependencies.
 - Calendar and Reminders access in System Settings.
 
 Grove uses the [official Swift MCP SDK](https://github.com/modelcontextprotocol/swift-sdk) and [EventKit](https://developer.apple.com/documentation/eventkit). macOS continues to manage account sync for iCloud, Google, Exchange, and other configured accounts.
