@@ -153,8 +153,8 @@ private struct ServiceRow: View {
                 ZStack {
                     Circle()
                         .fill(isEnabled
-                            ? Color(nsColor: .controlColor)
-                            : Color(nsColor: .controlBackgroundColor))
+                            ? Color(red: 0.96, green: 0.96, blue: 0.97)
+                            : Color(red: 0.38, green: 0.38, blue: 0.40))
 
                     Image(systemName: symbolName)
                         .font(.system(size: 14, weight: .medium))
