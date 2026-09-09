@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-ARCHIVE="${1:?Pass the signed, notarized Grove ZIP.}"
+ARCHIVE="${1:?Pass the signed, notarized Grove DMG.}"
 FEED_NAME="${2:?Pass the architecture-specific appcast filename.}"
 TOOLS="${SPARKLE_BIN_DIR:-$ROOT_DIR/build/ReleaseDerivedData/arm64/SourcePackages/artifacts/sparkle/Sparkle/bin}"
 VERSION="$(sed -n 's/.*static let version = "\([^"]*\)".*/\1/p' "$ROOT_DIR/Grove/GroveApp.swift")"
@@ -20,7 +20,7 @@ if [[ -n "${SPARKLE_ED_KEY_FILE:-}" ]]; then
   SIGNING=(--ed-key-file "$SPARKLE_ED_KEY_FILE")
 fi
 
-# TODO: Add delta archives when release size justifies keeping older ZIPs here.
+# TODO: Add delta archives when release size justifies keeping older DMGs here.
 "$TOOLS/generate_appcast" "${SIGNING[@]}" \
   --maximum-deltas 0 \
   --download-url-prefix "https://github.com/thsnkhn/grove/releases/download/v$VERSION/" \

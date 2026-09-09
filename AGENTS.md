@@ -184,8 +184,8 @@ Submit a first notarization without waiting for Apple:
 ```sh
 DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \
 NOTARY_PROFILE="XCode Notary" \
-RELEASE_NOTES_FILE="docs/releases/0.1.0.md" \
-WAIT_FOR_NOTARIZATION=NO ./script/release-sparkle.sh 0.1.0 1
+RELEASE_NOTES_FILE="docs/releases/0.2.0.md" \
+WAIT_FOR_NOTARIZATION=NO ./script/release-sparkle.sh 0.2.0 2
 ```
 
 The script checks the version, build number, notes, and worktree. It builds
@@ -198,8 +198,8 @@ Check and finalize the release after Apple accepts it:
 ```sh
 NOTARY_PROFILE="XCode Notary" ./script/check_notarization.sh
 NOTARY_PROFILE="XCode Notary" ./script/finalize_notarization.sh
-PREPARED_RELEASE=YES RELEASE_NOTES_FILE="docs/releases/0.1.0.md" \
-  ./script/release-sparkle.sh 0.1.0 1
+PREPARED_RELEASE=YES RELEASE_NOTES_FILE="docs/releases/0.2.0.md" \
+  ./script/release-sparkle.sh 0.2.0 2
 ```
 
 The final release step creates a signed Git tag, publishes the Apple silicon

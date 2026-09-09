@@ -18,6 +18,7 @@
 		A10000000000000000000099 /* Sparkle in Frameworks */ = {isa = PBXBuildFile; productRef = A10000000000000000000083 /* Sparkle */; };
 		A10000000000000000000100 /* GroveUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000019 /* GroveUpdater.swift */; };
 		A10000000000000000000102 /* GroveMCPHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000022 /* GroveMCPHTTPServer.swift */; };
+		A10000000000000000000103 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000023 /* Assets.xcassets */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -34,6 +35,7 @@
 		A10000000000000000000018 /* GroveProcessRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveProcessRegistry.swift; sourceTree = "<group>"; };
 		A10000000000000000000020 /* Grove.app */ = {isa = PBXFileReference; explicitFileType = "wrapper.application"; includeInIndex = 0; path = Grove.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000019 /* GroveUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveUpdater.swift; sourceTree = "<group>"; };
+		A10000000000000000000023 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +73,7 @@
 				A10000000000000000000018 /* GroveProcessRegistry.swift */,
 				A10000000000000000000019 /* GroveUpdater.swift */,
 				A10000000000000000000022 /* GroveMCPHTTPServer.swift */,
+				A10000000000000000000023 /* Assets.xcassets */,
 				A10000000000000000000021 /* Grove.icon */,
 			);
 			path = Grove;
@@ -148,7 +151,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A10000000000000000000101 /* Grove.icon in Resources */,
+				A10000000000000000000103 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -201,13 +204,13 @@
 		A10000000000000000000072 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "Grove.icon";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGNING_ALLOWED = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Grove/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thsnkhn.grove;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -222,14 +225,14 @@
 		A10000000000000000000073 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ASSETCATALOG_COMPILER_APPICON_NAME = "Grove.icon";
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGNING_ALLOWED = NO;
-				CURRENT_PROJECT_VERSION = 1;
+				CURRENT_PROJECT_VERSION = 2;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Grove/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.1.0;
+				MARKETING_VERSION = 0.2.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thsnkhn.grove;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				EXECUTABLE_NAME = Grove;

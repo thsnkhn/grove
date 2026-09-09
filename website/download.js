@@ -1,7 +1,7 @@
 const RELEASES_URL = "https://github.com/thsnkhn/grove/releases";
 const DOWNLOADS = {
-  appleSilicon: "https://github.com/thsnkhn/grove/releases/latest/download/Grove-Apple-Silicon.zip",
-  intel: "https://github.com/thsnkhn/grove/releases/latest/download/Grove-Intel.zip",
+  appleSilicon: "https://github.com/thsnkhn/grove/releases/latest/download/Grove-Apple-Silicon.dmg",
+  intel: "https://github.com/thsnkhn/grove/releases/latest/download/Grove-Intel.dmg",
 };
 
 const downloadLink = document.querySelector("[data-download-link]");

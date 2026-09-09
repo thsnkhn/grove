@@ -10,8 +10,8 @@ APP_NAME="Grove"
 EXECUTABLE_NAME="Grove"
 APPLE_SILICON_APP_BUNDLE="$DIST_DIR/Grove-Apple-Silicon.app"
 INTEL_APP_BUNDLE="$DIST_DIR/Grove-Intel.app"
-APPLE_SILICON_ZIP="$DIST_DIR/Grove-Apple-Silicon.zip"
-INTEL_ZIP="$DIST_DIR/Grove-Intel.zip"
+APPLE_SILICON_DMG="$DIST_DIR/Grove-Apple-Silicon.dmg"
+INTEL_DMG="$DIST_DIR/Grove-Intel.dmg"
 SOURCE_VERSION="$(sed -n 's/.*static let version = "\([^"]*\)".*/\1/p' "$ROOT_DIR/Grove/GroveApp.swift")"
 VERSION="${GROVE_VERSION:-$SOURCE_VERSION}"
 BUILD_NUMBER="${GROVE_BUILD_NUMBER:?Set GROVE_BUILD_NUMBER to an increasing positive integer.}"
@@ -50,8 +50,8 @@ rm -rf \
   "$APPLE_SILICON_APP_BUNDLE" \
   "$INTEL_APP_BUNDLE" \
   "$BUILD_ROOT" \
-  "$APPLE_SILICON_ZIP" \
-  "$INTEL_ZIP" \
+  "$APPLE_SILICON_DMG" \
+  "$INTEL_DMG" \
   "$DIST_DIR/SHA256SUMS" \
   "$APPLE_SILICON_RECORD" \
   "$INTEL_RECORD"
@@ -113,12 +113,8 @@ fi
 sign_app "$APPLE_SILICON_APP_BUNDLE"
 sign_app "$INTEL_APP_BUNDLE"
 
-zip_app() {
-  ditto -c -k --keepParent "$1" "$2"
-}
-
-zip_app "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_ZIP"
-zip_app "$INTEL_APP_BUNDLE" "$INTEL_ZIP"
+bash "$ROOT_DIR/script/create_dmg.sh" "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_DMG"
+bash "$ROOT_DIR/script/create_dmg.sh" "$INTEL_APP_BUNDLE" "$INTEL_DMG"
 
 submit_notarization() {
   local archive="$1"
@@ -133,8 +129,8 @@ submit_notarization() {
   fi
 }
 
-submit_notarization "$APPLE_SILICON_ZIP" "$APPLE_SILICON_RECORD"
-submit_notarization "$INTEL_ZIP" "$INTEL_RECORD"
+submit_notarization "$APPLE_SILICON_DMG" "$APPLE_SILICON_RECORD"
+submit_notarization "$INTEL_DMG" "$INTEL_RECORD"
 
 if [[ "$WAIT_FOR_NOTARIZATION" == "NO" ]]; then
   echo "Notarization is pending. Run script/check_notarization.sh later."
@@ -150,14 +146,18 @@ staple_app() {
 staple_app "$APPLE_SILICON_APP_BUNDLE"
 staple_app "$INTEL_APP_BUNDLE"
 
-# Recreate every archive so each downloaded app includes its notarization ticket.
-zip_app "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_ZIP"
-zip_app "$INTEL_APP_BUNDLE" "$INTEL_ZIP"
+# Recreate each disk image so it contains the stapled app, then staple the image.
+bash "$ROOT_DIR/script/create_dmg.sh" "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_DMG"
+bash "$ROOT_DIR/script/create_dmg.sh" "$INTEL_APP_BUNDLE" "$INTEL_DMG"
+xcrun stapler staple "$APPLE_SILICON_DMG"
+xcrun stapler validate "$APPLE_SILICON_DMG"
+xcrun stapler staple "$INTEL_DMG"
+xcrun stapler validate "$INTEL_DMG"
 
-(cd "$DIST_DIR" && shasum -a 256 "Grove-Apple-Silicon.zip" "Grove-Intel.zip" > SHA256SUMS)
-bash "$ROOT_DIR/script/generate_appcast.sh" "$APPLE_SILICON_ZIP" appcast-arm64.xml
-bash "$ROOT_DIR/script/generate_appcast.sh" "$INTEL_ZIP" appcast-intel.xml
-echo "Created $APPLE_SILICON_ZIP"
-echo "Created $INTEL_ZIP"
+(cd "$DIST_DIR" && shasum -a 256 "Grove-Apple-Silicon.dmg" "Grove-Intel.dmg" > SHA256SUMS)
+bash "$ROOT_DIR/script/generate_appcast.sh" "$APPLE_SILICON_DMG" appcast-arm64.xml
+bash "$ROOT_DIR/script/generate_appcast.sh" "$INTEL_DMG" appcast-intel.xml
+echo "Created $APPLE_SILICON_DMG"
+echo "Created $INTEL_DMG"
 echo "Created $DIST_DIR/appcast-arm64.xml"
 echo "Created $DIST_DIR/appcast-intel.xml"

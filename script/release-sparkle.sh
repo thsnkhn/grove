@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Build, sign, notarize, tag, and publish one Grove release.
-# Usage: RELEASE_NOTES_FILE=docs/releases/0.1.0.md script/release-sparkle.sh 0.1.0 2
+# Usage: RELEASE_NOTES_FILE=docs/releases/0.2.0.md script/release-sparkle.sh 0.2.0 2
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GITHUB_REPO="${GITHUB_REPO:-thsnkhn/grove}"
@@ -12,8 +12,8 @@ REQUESTED_VERSION="${1:-}"
 VERSION="${REQUESTED_VERSION#v}"
 BUILD_NUMBER="${2:-${GROVE_BUILD_NUMBER:-}}"
 RELEASE_TAG="v$VERSION"
-APPLE_SILICON_ZIP="$ROOT_DIR/dist/Grove-Apple-Silicon.zip"
-INTEL_ZIP="$ROOT_DIR/dist/Grove-Intel.zip"
+APPLE_SILICON_DMG="$ROOT_DIR/dist/Grove-Apple-Silicon.dmg"
+INTEL_DMG="$ROOT_DIR/dist/Grove-Intel.dmg"
 CHECKSUM_PATH="$ROOT_DIR/dist/SHA256SUMS"
 APPLE_SILICON_APPCAST="$ROOT_DIR/dist/appcast-arm64.xml"
 INTEL_APPCAST="$ROOT_DIR/dist/appcast-intel.xml"
@@ -73,7 +73,7 @@ else
   fi
 fi
 
-ARTIFACTS=("$APPLE_SILICON_ZIP" "$INTEL_ZIP")
+ARTIFACTS=("$APPLE_SILICON_DMG" "$INTEL_DMG")
 APPCASTS=("$APPLE_SILICON_APPCAST" "$INTEL_APPCAST")
 for artifact in "${ARTIFACTS[@]}" "$CHECKSUM_PATH" "${APPCASTS[@]}"; do
   [[ -f "$artifact" ]] || { echo "Missing release artifact: $artifact" >&2; exit 1; }

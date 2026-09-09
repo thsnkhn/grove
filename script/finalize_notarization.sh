@@ -7,8 +7,8 @@ APPLE_SILICON_APP_BUNDLE="$DIST_DIR/Grove-Apple-Silicon.app"
 INTEL_APP_BUNDLE="$DIST_DIR/Grove-Intel.app"
 VERSION="$(sed -n 's/.*static let version = "\([^"]*\)".*/\1/p' "$ROOT_DIR/Grove/GroveApp.swift")"
 NOTARY_PROFILE="${NOTARY_PROFILE:-XCode Notary}"
-APPLE_SILICON_ZIP="$DIST_DIR/Grove-Apple-Silicon.zip"
-INTEL_ZIP="$DIST_DIR/Grove-Intel.zip"
+APPLE_SILICON_DMG="$DIST_DIR/Grove-Apple-Silicon.dmg"
+INTEL_DMG="$DIST_DIR/Grove-Intel.dmg"
 
 for app_bundle in "$APPLE_SILICON_APP_BUNDLE" "$INTEL_APP_BUNDLE"; do
   [[ -d "$app_bundle" ]] || { echo "Prepared app not found: $app_bundle" >&2; exit 1; }
@@ -48,11 +48,15 @@ staple_app() {
 staple_app "$APPLE_SILICON_APP_BUNDLE"
 staple_app "$INTEL_APP_BUNDLE"
 
-ditto -c -k --keepParent "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_ZIP"
-ditto -c -k --keepParent "$INTEL_APP_BUNDLE" "$INTEL_ZIP"
-(cd "$DIST_DIR" && shasum -a 256 "Grove-Apple-Silicon.zip" "Grove-Intel.zip" > SHA256SUMS)
-bash "$ROOT_DIR/script/generate_appcast.sh" "$APPLE_SILICON_ZIP" appcast-arm64.xml
-bash "$ROOT_DIR/script/generate_appcast.sh" "$INTEL_ZIP" appcast-intel.xml
+bash "$ROOT_DIR/script/create_dmg.sh" "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_DMG"
+bash "$ROOT_DIR/script/create_dmg.sh" "$INTEL_APP_BUNDLE" "$INTEL_DMG"
+xcrun stapler staple "$APPLE_SILICON_DMG"
+xcrun stapler validate "$APPLE_SILICON_DMG"
+xcrun stapler staple "$INTEL_DMG"
+xcrun stapler validate "$INTEL_DMG"
+(cd "$DIST_DIR" && shasum -a 256 "Grove-Apple-Silicon.dmg" "Grove-Intel.dmg" > SHA256SUMS)
+bash "$ROOT_DIR/script/generate_appcast.sh" "$APPLE_SILICON_DMG" appcast-arm64.xml
+bash "$ROOT_DIR/script/generate_appcast.sh" "$INTEL_DMG" appcast-intel.xml
 
 echo "Finalized notarized Grove $VERSION."
 echo "Run PREPARED_RELEASE=YES script/release-sparkle.sh $VERSION <build> to publish it."

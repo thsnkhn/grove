@@ -85,8 +85,8 @@ jobs:
           target_commitish: ${{ github.sha }}
           generate_release_notes: true
           files: |
-            dist/Grove-Apple-Silicon.zip
-            dist/Grove-Intel.zip
+            dist/Grove-Apple-Silicon.dmg
+            dist/Grove-Intel.dmg
             dist/SHA256SUMS
             dist/appcast-arm64.xml
             dist/appcast-intel.xml
