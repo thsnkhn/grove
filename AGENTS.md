@@ -189,8 +189,8 @@ WAIT_FOR_NOTARIZATION=NO ./script/release-sparkle.sh 0.2.0 2
 ```
 
 The script checks the version, build number, notes, and worktree. It builds
-signed Apple silicon and Intel archives, submits both archives, and records the
-Apple requests in `dist/notarization-*.json`. It does not publish an
+signed Apple silicon and Intel DMGs, submits both DMGs, and records Apple
+requests in `dist/notarization-*.json`. It does not publish an
 unnotarized app.
 
 Check and finalize the release after Apple accepts it:

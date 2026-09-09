@@ -39,17 +39,8 @@ for record in "${RECORDS[@]}"; do
   fi
 done
 
-staple_app() {
-  local app_bundle="$1"
-  xcrun stapler staple "$app_bundle"
-  xcrun stapler validate "$app_bundle"
-}
-
-staple_app "$APPLE_SILICON_APP_BUNDLE"
-staple_app "$INTEL_APP_BUNDLE"
-
-bash "$ROOT_DIR/script/create_dmg.sh" "$APPLE_SILICON_APP_BUNDLE" "$APPLE_SILICON_DMG"
-bash "$ROOT_DIR/script/create_dmg.sh" "$INTEL_APP_BUNDLE" "$INTEL_DMG"
+# Staple the exact disk images that Apple accepted. Recreating an image after
+# submission changes its bytes and invalidates the notarization ticket.
 xcrun stapler staple "$APPLE_SILICON_DMG"
 xcrun stapler validate "$APPLE_SILICON_DMG"
 xcrun stapler staple "$INTEL_DMG"
