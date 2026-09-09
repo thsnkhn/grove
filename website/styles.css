@@ -6,6 +6,12 @@
   --muted-ink: rgba(0, 0, 0, 0.42);
   --border: rgba(0, 0, 0, 0.1);
   --button: #262626;
+  --panel: #171718;
+  --panel-ink: rgba(255, 255, 255, 0.92);
+  --panel-secondary-ink: rgba(255, 255, 255, 0.58);
+  --panel-tertiary-ink: rgba(255, 255, 255, 0.3);
+  --panel-fill: rgba(255, 255, 255, 0.16);
+  --calendar-red: #ff453a;
   --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
@@ -62,8 +68,150 @@ a {
 }
 
 .preview-slot {
+  position: relative;
+  display: flex;
   width: 100%;
-  min-height: 212px;
+  min-height: 378px;
+  align-items: center;
+  justify-content: center;
+}
+
+.app-preview {
+  position: relative;
+  width: 304px;
+  padding: 18px 16px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 26px;
+  background: var(--panel);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.18), 0 1px 2px rgba(0, 0, 0, 0.18);
+  color: var(--panel-ink);
+  animation: preview-enter 360ms var(--ease-out) both;
+}
+
+.app-preview-header {
+  display: flex;
+  min-height: 26px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2px;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.4px;
+  line-height: 26px;
+}
+
+.preview-chevron {
+  width: 10px;
+  height: 10px;
+  margin: 0 2px 4px 0;
+  border-right: 2px solid var(--panel-secondary-ink);
+  border-bottom: 2px solid var(--panel-secondary-ink);
+  transform: rotate(45deg);
+}
+
+.tool-list {
+  display: grid;
+  gap: 2px;
+  margin-top: 18px;
+}
+
+.tool-row {
+  display: grid;
+  min-height: 42px;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+}
+
+.tool-icon {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--panel-fill);
+  color: var(--panel-secondary-ink);
+}
+
+.tool-glyph {
+  display: block;
+  width: 17px;
+  height: 17px;
+  background: currentColor;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+}
+
+.tool-icon-calendar .tool-glyph {
+  -webkit-mask-image: url("icons/calendar.png");
+  mask-image: url("icons/calendar.png");
+}
+
+.tool-icon-reminders .tool-glyph {
+  -webkit-mask-image: url("icons/list-bullet.png");
+  mask-image: url("icons/list-bullet.png");
+}
+
+.tool-icon-mail .tool-glyph {
+  -webkit-mask-image: url("icons/envelope.png");
+  mask-image: url("icons/envelope.png");
+}
+
+.tool-icon-notes .tool-glyph {
+  -webkit-mask-image: url("icons/note-text.png");
+  mask-image: url("icons/note-text.png");
+}
+
+.tool-icon-messages .tool-glyph {
+  -webkit-mask-image: url("icons/message.png");
+  mask-image: url("icons/message.png");
+}
+
+.tool-icon-contacts .tool-glyph {
+  -webkit-mask-image: url("icons/person-2.png");
+  mask-image: url("icons/person-2.png");
+}
+
+.tool-name,
+.tool-status {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tool-name {
+  color: var(--panel-ink);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: -0.14px;
+  line-height: 20px;
+}
+
+.tool-status {
+  color: var(--panel-secondary-ink);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: -0.12px;
+  line-height: 18px;
+}
+
+.tool-row-active .tool-icon {
+  background: #f4f4f1;
+  color: var(--calendar-red);
+}
+
+.tool-row-soon .tool-icon {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--panel-tertiary-ink);
+}
+
+.tool-row-soon .tool-name,
+.tool-row-soon .tool-status {
+  color: var(--panel-tertiary-ink);
 }
 
 .copy {
@@ -225,6 +373,18 @@ h1 {
   }
 }
 
+@keyframes preview-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
 @media (hover: hover) and (pointer: fine) {
   .button-primary:hover {
     background: #111;
@@ -251,10 +411,12 @@ h1 {
   }
 
   .preview-slot {
-    min-height: 88px;
+    order: 2;
+    min-height: 320px;
   }
 
   .copy {
+    order: 1;
     min-height: 0;
     align-items: center;
     padding: 0;
@@ -301,7 +463,8 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
   .brand,
   .copy-lower,
-  .site-footer {
+  .site-footer,
+  .app-preview {
     animation-name: fade-in;
     animation-duration: 180ms;
     animation-delay: 0ms;

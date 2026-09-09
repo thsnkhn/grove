@@ -5,19 +5,79 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       name="description"
-      content="Grove connects AI assistants to native macOS apps through the Model Context Protocol."
+      content="A local macOS MCP server that lets agents manage Apple Calendar events and Reminders. Your data stays on your Mac."
     />
     <meta name="theme-color" content="#fdfdfd" />
     <link rel="icon" type="image/svg+xml" href="tree-fill.svg" />
-    <title>Grove — Native tools, close to home.</title>
+    <title>Grove — Calendar and Reminders for agents</title>
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
     <div class="page-shell">
       <main class="hero-wrap">
         <section class="hero" aria-labelledby="page-title">
-          <!-- TODO: Replace this reserved space with the Grove UI preview. -->
-          <div class="preview-slot" aria-hidden="true"></div>
+          <div class="preview-slot">
+            <div
+              class="app-preview"
+              role="img"
+              aria-label="Grove menu bar panel. Calendar is on. Reminders is off. Mail, Notes, Messages, and Contacts are coming soon."
+            >
+              <div class="app-preview-header">
+                <span>Grove</span>
+                <span class="preview-chevron" aria-hidden="true"></span>
+              </div>
+
+              <div class="tool-list">
+                <div class="tool-row tool-row-active">
+                  <span class="tool-icon tool-icon-calendar" aria-hidden="true">
+                    <span class="tool-glyph"></span>
+                  </span>
+                  <span class="tool-name">Calendar</span>
+                  <span class="tool-status">On</span>
+                </div>
+
+                <div class="tool-row">
+                  <span class="tool-icon tool-icon-reminders" aria-hidden="true">
+                    <span class="tool-glyph"></span>
+                  </span>
+                  <span class="tool-name">Reminders</span>
+                  <span class="tool-status">Off</span>
+                </div>
+
+                <div class="tool-row tool-row-soon">
+                  <span class="tool-icon tool-icon-mail" aria-hidden="true">
+                    <span class="tool-glyph"></span>
+                  </span>
+                  <span class="tool-name">Mail</span>
+                  <span class="tool-status">Soon</span>
+                </div>
+
+                <div class="tool-row tool-row-soon">
+                  <span class="tool-icon tool-icon-notes" aria-hidden="true">
+                    <span class="tool-glyph"></span>
+                  </span>
+                  <span class="tool-name">Notes</span>
+                  <span class="tool-status">Soon</span>
+                </div>
+
+                <div class="tool-row tool-row-soon">
+                  <span class="tool-icon tool-icon-messages" aria-hidden="true">
+                    <span class="tool-glyph"></span>
+                  </span>
+                  <span class="tool-name">Messages</span>
+                  <span class="tool-status">Soon</span>
+                </div>
+
+                <div class="tool-row tool-row-soon">
+                  <span class="tool-icon tool-icon-contacts" aria-hidden="true">
+                    <span class="tool-glyph"></span>
+                  </span>
+                  <span class="tool-name">Contacts</span>
+                  <span class="tool-status">Soon</span>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <div class="copy">
             <p class="brand">
@@ -26,9 +86,9 @@
             </p>
 
             <div class="copy-lower">
-              <h1 id="page-title">Native tools, close to home.</h1>
+              <h1 id="page-title">Let your agent manage Calendar &amp; Reminders.</h1>
               <p class="description">
-                A small local MCP server that gives AI assistants access to Calendar and Reminders on macOS.
+                A local MCP server for macOS that lets your agent manage Apple Calendar and Reminders.
               </p>
 
               <nav class="actions" aria-label="Project links">
