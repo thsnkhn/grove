@@ -12,9 +12,18 @@ final class EventKitStore {
     private let timeZone = TimeZone.current
 
     func authorize() async throws -> String {
-        let events = try await requestEventsAccess()
-        let reminders = try await requestRemindersAccess()
+        let events = try await authorize(.calendar)
+        let reminders = try await authorize(.reminders)
         return "Calendar: \(events ? "granted" : "denied")\nReminders: \(reminders ? "granted" : "denied")"
+    }
+
+    func authorize(_ service: GroveService) async throws -> Bool {
+        switch service {
+        case .calendar:
+            return try await requestEventsAccess()
+        case .reminders:
+            return try await requestRemindersAccess()
+        }
     }
 
     func doctor() -> String {

@@ -19,6 +19,9 @@
 		A10000000000000000000100 /* GroveUpdater.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000019 /* GroveUpdater.swift */; };
 		A10000000000000000000102 /* GroveMCPHTTPServer.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000022 /* GroveMCPHTTPServer.swift */; };
 		A10000000000000000000103 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000023 /* Assets.xcassets */; };
+		A10000000000000000000104 /* GroveAgents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000024 /* GroveAgents.swift */; };
+		A10000000000000000000105 /* GroveSkillInstaller.swift in Sources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000025 /* GroveSkillInstaller.swift */; };
+		A10000000000000000000106 /* SKILL.md in Resources */ = {isa = PBXBuildFile; fileRef = A10000000000000000000026 /* SKILL.md */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -36,6 +39,9 @@
 		A10000000000000000000020 /* Grove.app */ = {isa = PBXFileReference; explicitFileType = "wrapper.application"; includeInIndex = 0; path = Grove.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A10000000000000000000019 /* GroveUpdater.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveUpdater.swift; sourceTree = "<group>"; };
 		A10000000000000000000023 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A10000000000000000000024 /* GroveAgents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveAgents.swift; sourceTree = "<group>"; };
+		A10000000000000000000025 /* GroveSkillInstaller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GroveSkillInstaller.swift; sourceTree = "<group>"; };
+		A10000000000000000000026 /* SKILL.md */ = {isa = PBXFileReference; lastKnownFileType = text; name = SKILL.md; path = ../skills/grove/SKILL.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +81,9 @@
 				A10000000000000000000022 /* GroveMCPHTTPServer.swift */,
 				A10000000000000000000023 /* Assets.xcassets */,
 				A10000000000000000000021 /* Grove.icon */,
+				A10000000000000000000024 /* GroveAgents.swift */,
+				A10000000000000000000025 /* GroveSkillInstaller.swift */,
+				A10000000000000000000026 /* SKILL.md */,
 			);
 			path = Grove;
 			sourceTree = "<group>";
@@ -152,6 +161,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				A10000000000000000000103 /* Assets.xcassets in Resources */,
+				A10000000000000000000106 /* SKILL.md in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -175,6 +185,8 @@
 				A10000000000000000000097 /* GroveProcessRegistry.swift in Sources */,
 				A10000000000000000000100 /* GroveUpdater.swift in Sources */,
 				A10000000000000000000102 /* GroveMCPHTTPServer.swift in Sources */,
+				A10000000000000000000104 /* GroveAgents.swift in Sources */,
+				A10000000000000000000105 /* GroveSkillInstaller.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -206,11 +218,11 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGNING_ALLOWED = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Grove/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.3.0;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thsnkhn.grove;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
@@ -227,12 +239,12 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGNING_ALLOWED = NO;
-				CURRENT_PROJECT_VERSION = 2;
+				CURRENT_PROJECT_VERSION = 3;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Grove/Info.plist;
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
-				MARKETING_VERSION = 0.2.0;
+				MARKETING_VERSION = 0.3.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.thsnkhn.grove;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/../Frameworks";
 				EXECUTABLE_NAME = Grove;

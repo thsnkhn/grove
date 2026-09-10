@@ -22,6 +22,7 @@ final class GroveAppDelegate: NSObject, NSApplicationDelegate {
             Task { await runHeadlessCommand() }
         } else {
             NSApp.setActivationPolicy(.accessory)
+            GroveSkillInstaller.shared.installBundledSkill()
             mcpHTTPServer = GroveMCPHTTPServer()
             mcpHTTPServer?.start()
         }
@@ -80,15 +81,16 @@ struct GroveApp: App {
     @NSApplicationDelegateAdaptor(GroveAppDelegate.self) private var appDelegate
     @StateObject private var settings = GroveSettings()
     @StateObject private var updater = GroveUpdater()
+    @StateObject private var agentManager = GroveAgentManager()
 
     var body: some Scene {
         MenuBarExtra("Grove", systemImage: "tree.fill") {
-            GroveMenuView(settings: settings, updater: updater)
+            GroveMenuView(settings: settings, updater: updater, agentManager: agentManager)
         }
         .menuBarExtraStyle(.window)
     }
 }
 
 enum Grove {
-    static let version = "0.2.0"
+    static let version = "0.3.0"
 }

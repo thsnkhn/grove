@@ -57,6 +57,7 @@ enum GroveService: String, CaseIterable, Hashable, Identifiable, Sendable {
 
 enum GrovePreferences {
     static let suiteName = "com.thsnkhn.grove.settings"
+    private static let welcomeCompletedKey = "welcome.completed"
 
     // UserDefaults synchronizes its own reads and writes across processes.
     nonisolated(unsafe) private static let defaults = UserDefaults(suiteName: suiteName) ?? .standard
@@ -77,6 +78,14 @@ enum GrovePreferences {
 
     static func enabledServices() -> Set<GroveService> {
         Set(GroveService.allCases.filter(isEnabled))
+    }
+
+    static func hasCompletedWelcome() -> Bool {
+        defaults.bool(forKey: welcomeCompletedKey)
+    }
+
+    static func setWelcomeCompleted(_ completed: Bool) {
+        defaults.set(completed, forKey: welcomeCompletedKey)
     }
 }
 

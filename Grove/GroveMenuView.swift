@@ -4,71 +4,124 @@ import SwiftUI
 struct GroveMenuView: View {
     @ObservedObject var settings: GroveSettings
     @ObservedObject var updater: GroveUpdater
-    @State private var showsOptions = false
+    @ObservedObject var agentManager: GroveAgentManager
+    @State private var showsDetails = false
+    @State private var hasAppeared = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 14) {
             settingsHeader
 
-            LazyVStack(spacing: 0) {
-                ForEach(GroveService.allCases) { service in
-                    ServiceRow(
-                        title: service.title,
-                        symbolName: settings.isEnabled(service)
-                            ? service.filledSymbolName
-                            : service.outlineSymbolName,
-                        status: settings.isEnabled(service) ? "On" : "Off",
-                        color: color(for: service),
-                        isEnabled: settings.isEnabled(service)
-                    ) {
-                        settings.setEnabled(!settings.isEnabled(service), for: service)
-                    }
-                }
+            if showsDetails {
+                detailContent
+                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
 
-                ForEach(ComingSoonTool.all) { tool in
-                    ServiceRow(
-                        title: tool.title,
-                        symbolName: tool.symbolName,
-                        status: "Soon",
-                        color: .secondary,
-                        isEnabled: false,
-                        action: nil
-                    )
-                }
+            if settings.hasCompletedWelcome {
+                serviceList
             }
         }
         .padding(16)
         .frame(width: 304)
+        .onAppear(perform: load)
+        .alert(
+            "Grove",
+            isPresented: Binding(
+                get: { agentManager.errorMessage != nil || settings.errorMessage != nil },
+                set: {
+                    if !$0 {
+                        agentManager.errorMessage = nil
+                        settings.errorMessage = nil
+                    }
+                }
+            )
+        ) {
+            Button("OK") {
+                agentManager.errorMessage = nil
+                settings.errorMessage = nil
+            }
+        } message: {
+            Text(agentManager.errorMessage ?? settings.errorMessage ?? "Try again.")
+        }
     }
 
     private var settingsHeader: some View {
-        VStack(spacing: 16) {
-            Button {
-                withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
-                    showsOptions.toggle()
-                }
-            } label: {
-                HStack {
-                    Text("Grove")
-                        .font(.system(size: 15, weight: .semibold))
-
-                    Spacer()
-
-                    Image(systemName: "chevron.right")
-                        .font(.system(size: 13, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                        .rotationEffect(.degrees(showsOptions ? 90 : 0))
-                }
-                .contentShape(Rectangle())
+        Button {
+            guard settings.hasCompletedWelcome else { return }
+            withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
+                showsDetails.toggle()
             }
-            .buttonStyle(.plain)
-            .help(showsOptions ? "Hide Grove options" : "Show Grove options")
-            .accessibilityLabel("Grove options")
-            .accessibilityValue(showsOptions ? "Expanded" : "Collapsed")
+            if showsDetails {
+                agentManager.refresh()
+            }
+        } label: {
+            HStack {
+                Text("Grove")
+                    .font(.system(size: 15, weight: .semibold))
 
-            if showsOptions {
+                Spacer()
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundStyle(.secondary)
+                    .rotationEffect(.degrees(showsDetails ? 90 : 0))
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .help(showsDetails ? "Hide Grove options" : "Show Grove options")
+        .accessibilityLabel("Grove options")
+        .accessibilityValue(
+            settings.hasCompletedWelcome
+                ? (showsDetails ? "Expanded" : "Collapsed")
+                : "Setup required"
+        )
+    }
+
+    private var detailContent: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            GroveAgentSetupView(agentManager: agentManager) {
+                settings.completeWelcome()
+                withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
+                    showsDetails = false
+                }
+            }
+
+            if settings.hasCompletedWelcome {
+                Divider()
+                    .opacity(0.65)
+
                 options
-                    .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
+    }
+
+    private var serviceList: some View {
+        LazyVStack(spacing: 0) {
+            ForEach(GroveService.allCases) { service in
+                let isEnabled = settings.isEnabled(service)
+                ServiceRow(
+                    title: service.title,
+                    symbolName: isEnabled
+                        ? service.filledSymbolName
+                        : service.outlineSymbolName,
+                    status: settings.isAuthorizing(service) ? "…" : (isEnabled ? "On" : "Off"),
+                    color: color(for: service),
+                    isEnabled: isEnabled
+                ) {
+                    settings.toggle(service)
+                }
+            }
+
+            ForEach(ComingSoonTool.all) { tool in
+                ServiceRow(
+                    title: tool.title,
+                    symbolName: tool.symbolName,
+                    status: "Soon",
+                    color: .secondary,
+                    isEnabled: false,
+                    action: nil
+                )
             }
         }
     }
@@ -137,6 +190,79 @@ struct GroveMenuView: View {
         }
     }
 
+    private func load() {
+        guard !hasAppeared else { return }
+        hasAppeared = true
+        showsDetails = !settings.hasCompletedWelcome
+        agentManager.refresh()
+    }
+}
+
+private struct GroveAgentSetupView: View {
+    @ObservedObject var agentManager: GroveAgentManager
+    let onContinue: () -> Void
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Welcome to Grove")
+                    .font(.system(size: 15, weight: .semibold))
+
+                Text("Connect Grove to an installed agent.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+            }
+
+            if agentManager.agents.isEmpty {
+                Text("No supported agents found. See the README for manual setup.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            } else {
+                VStack(spacing: 8) {
+                    ForEach(agentManager.agents) { agent in
+                        GroveAgentRow(agent: agent, agentManager: agentManager)
+                    }
+                }
+            }
+
+            HStack {
+                Spacer()
+                Button("Continue", action: onContinue)
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+            }
+        }
+    }
+}
+
+private struct GroveAgentRow: View {
+    let agent: GroveAgent
+    @ObservedObject var agentManager: GroveAgentManager
+
+    var body: some View {
+        HStack(spacing: 8) {
+            Text(agent.title)
+                .font(.system(size: 13))
+
+            Spacer(minLength: 8)
+
+            if agent.supportsMCPCommands {
+                Button(agent.mcpInstalled ? "Uninstall" : "Install") {
+                    agentManager.toggleMCP(for: agent)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+                .disabled(agentManager.isBusy(agent))
+            } else {
+                Button("README") {
+                    agentManager.openREADME(for: agent)
+                }
+                .buttonStyle(.bordered)
+                .controlSize(.small)
+            }
+        }
+    }
 }
 
 private struct ServiceRow: View {

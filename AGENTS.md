@@ -20,7 +20,7 @@ polling loops, or a database without a clear product requirement.
 ## Project layout
 
 - `Grove.xcodeproj`: primary macOS app project.
-- `Grove/`: app, menu bar UI, EventKit store, MCP server, settings, and process lifecycle.
+- `Grove/`: app, menu bar UI, agent setup, skill installer, EventKit store, MCP server, settings, and process lifecycle.
 - `GroveTests/`: focused SwiftPM tests.
 - `script/build_and_run.sh`: local build and run helper.
 - `script/package_release.sh`: lower-level signed packaging command.
@@ -88,6 +88,14 @@ The menu bar selection controls the active tool list. Grove reads the current
 selection for every request and sends `notifications/tools/list_changed` when
 the selection changes. Existing clients do not need a server restart.
 
+The welcome view detects Codex, Claude Code, Hermes, OpenClaw, Cursor, and
+Windsurf. Grove runs a client command only when the client provides a supported
+CLI action. Otherwise, it opens the README with manual setup instructions.
+
+There is no shared macOS-wide MCP auto-discovery or configuration standard.
+MCP capability discovery happens after a client connects to a known server.
+Grove does not edit arbitrary client configuration files.
+
 ### Codex
 
 For the app-owned local HTTP server:
@@ -134,13 +142,21 @@ Clients that use a JSON MCP configuration use the same stdio command:
 Use the client’s own configuration location and restart it after editing the
 file. Do not assume that one client’s configuration format applies to another.
 
-There is no shared macOS-wide MCP auto-discovery or configuration standard.
-MCP capability discovery happens after a client connects to a known server.
-Keep setup explicit and ask for consent before changing a client’s files.
+OpenClaw setup uses its documented `openclaw mcp set` and `openclaw mcp unset`
+commands. Hermes uses its MCP YAML configuration because it has no supported
+Grove setup command.
 
 ## Agent skill
 
 The Grove skill is at `skills/grove/SKILL.md`.
+
+Menu bar mode copies the bundled skill to these standard locations at launch:
+
+```text
+~/.agents/skills/grove/SKILL.md
+~/.codex/skills/grove/SKILL.md
+~/.claude/skills/grove/SKILL.md
+```
 
 For a local Codex skill installation:
 
@@ -152,16 +168,16 @@ cp skills/grove/SKILL.md ~/.codex/skills/grove/SKILL.md
 Start a new Codex session after installing the skill. The skill explains date
 formats, recurrence scope, identifier lookup, and safe mutation rules.
 
-Do not install the skill or edit agent configuration without user consent. A
-future first-launch setup may offer these actions after detecting a supported
-client. It must show what it will change and allow the user to decline.
+The installer changes only the Grove skill file. It does not edit agent MCP
+configuration. The welcome view handles MCP setup actions separately.
 
 ## Architecture
 
 The same executable has two modes:
 
 - Menu bar mode: `MenuBarExtra` shows service toggles, app controls, and starts
-  the loopback MCP server.
+  the loopback MCP server. It also discovers agents and installs the bundled
+  skill.
 - Headless mode: `--mcp` starts the stdio MCP server for clients that need a
   command.
 
@@ -169,7 +185,10 @@ The menu bar app owns the loopback listener and active stdio process leases.
 Quitting Grove stops the listener and terminates those processes.
 `GroveSettings` stores service choices and manages the login item.
 `EventKitStore` owns Calendar and Reminders access. `MCPServer` exposes only the
-enabled service tools.
+enabled service tools. Enabling a service requests its EventKit permission;
+disabling it removes the service from Grove's MCP tool list. macOS does not
+provide a public API for revoking an EventKit grant, so revocation remains a
+System Settings action.
 
 Keep these responsibilities separate. Prefer SwiftUI and system controls. Use
 AppKit only where macOS behavior requires it.
@@ -184,8 +203,8 @@ Submit a first notarization without waiting for Apple:
 ```sh
 DEVELOPER_ID_APPLICATION="Developer ID Application: ..." \
 NOTARY_PROFILE="XCode Notary" \
-RELEASE_NOTES_FILE="docs/releases/0.2.0.md" \
-WAIT_FOR_NOTARIZATION=NO ./script/release-sparkle.sh 0.2.0 2
+RELEASE_NOTES_FILE="docs/releases/0.3.0.md" \
+WAIT_FOR_NOTARIZATION=NO ./script/release-sparkle.sh 0.3.0 3
 ```
 
 The script checks the version, build number, notes, and worktree. It builds
@@ -198,8 +217,8 @@ Check and finalize the release after Apple accepts it:
 ```sh
 NOTARY_PROFILE="XCode Notary" ./script/check_notarization.sh
 NOTARY_PROFILE="XCode Notary" ./script/finalize_notarization.sh
-PREPARED_RELEASE=YES RELEASE_NOTES_FILE="docs/releases/0.2.0.md" \
-  ./script/release-sparkle.sh 0.2.0 2
+PREPARED_RELEASE=YES RELEASE_NOTES_FILE="docs/releases/0.3.0.md" \
+  ./script/release-sparkle.sh 0.3.0 3
 ```
 
 The final release step creates a signed Git tag, publishes the Apple silicon

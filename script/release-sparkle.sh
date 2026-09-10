@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Build, sign, notarize, tag, and publish one Grove release.
-# Usage: RELEASE_NOTES_FILE=docs/releases/0.2.0.md script/release-sparkle.sh 0.2.0 2
+# Usage: RELEASE_NOTES_FILE=docs/releases/0.3.0.md script/release-sparkle.sh 0.3.0 3
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 GITHUB_REPO="${GITHUB_REPO:-thsnkhn/grove}"
