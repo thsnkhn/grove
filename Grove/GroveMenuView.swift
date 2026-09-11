@@ -5,19 +5,35 @@ struct GroveMenuView: View {
     @ObservedObject var settings: GroveSettings
     @ObservedObject var updater: GroveUpdater
     @ObservedObject var agentManager: GroveAgentManager
-    @State private var showsDetails = false
+    @State private var showsSettings = false
     @State private var hasAppeared = false
+
+    init(
+        settings: GroveSettings,
+        updater: GroveUpdater,
+        agentManager: GroveAgentManager,
+        showsSettings: Bool = false
+    ) {
+        self.settings = settings
+        self.updater = updater
+        self.agentManager = agentManager
+        _showsSettings = State(initialValue: showsSettings)
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            settingsHeader
-
-            if showsDetails {
-                detailContent
-                    .transition(.move(edge: .top).combined(with: .opacity))
-            }
-
-            if settings.hasCompletedWelcome {
+            if !settings.hasCompletedWelcome {
+                GroveAgentSetupView(agentManager: agentManager, isWelcome: true) {
+                    settings.completeWelcome()
+                    showsSettings = false
+                }
+            } else if showsSettings {
+                settingsHeader
+                GroveAgentSetupView(agentManager: agentManager, isWelcome: false)
+                Divider()
+                options
+            } else {
+                mainHeader
                 serviceList
             }
         }
@@ -45,54 +61,46 @@ struct GroveMenuView: View {
         }
     }
 
-    private var settingsHeader: some View {
-        Button {
-            guard settings.hasCompletedWelcome else { return }
-            withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
-                showsDetails.toggle()
-            }
-            if showsDetails {
+    private var mainHeader: some View {
+        HStack {
+            Text("Grove")
+                .font(.system(size: 15, weight: .semibold))
+
+            Spacer()
+
+            Button {
+                showsSettings = true
                 agentManager.refresh()
+            } label: {
+                Image(systemName: "gearshape")
+                    .frame(width: 24, height: 24)
+                    .contentShape(Rectangle())
             }
-        } label: {
-            HStack {
-                Text("Grove")
-                    .font(.system(size: 15, weight: .semibold))
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 13, weight: .semibold))
-                    .foregroundStyle(.secondary)
-                    .rotationEffect(.degrees(showsDetails ? 90 : 0))
-            }
-            .contentShape(Rectangle())
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .help("Settings")
+            .accessibilityLabel("Settings")
         }
-        .buttonStyle(.plain)
-        .help(showsDetails ? "Hide Grove options" : "Show Grove options")
-        .accessibilityLabel("Grove options")
-        .accessibilityValue(
-            settings.hasCompletedWelcome
-                ? (showsDetails ? "Expanded" : "Collapsed")
-                : "Setup required"
-        )
     }
 
-    private var detailContent: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            GroveAgentSetupView(agentManager: agentManager) {
-                settings.completeWelcome()
-                withAnimation(.snappy(duration: 0.25, extraBounce: 0)) {
-                    showsDetails = false
-                }
+    private var settingsHeader: some View {
+        HStack(spacing: 8) {
+            Button {
+                showsSettings = false
+            } label: {
+                Image(systemName: "chevron.left")
+                    .frame(width: 24, height: 24)
+                    .contentShape(Rectangle())
             }
+            .buttonStyle(.plain)
+            .foregroundStyle(.secondary)
+            .help("Back to Grove")
+            .accessibilityLabel("Back to Grove")
 
-            if settings.hasCompletedWelcome {
-                Divider()
-                    .opacity(0.65)
+            Text("Settings")
+                .font(.system(size: 15, weight: .semibold))
 
-                options
-            }
+            Spacer()
         }
     }
 
@@ -130,7 +138,7 @@ struct GroveMenuView: View {
         VStack(spacing: 0) {
             HStack(spacing: 8) {
                 Text("Launch at Login")
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
                     .foregroundStyle(.primary)
 
                 Spacer(minLength: 8)
@@ -160,7 +168,7 @@ struct GroveMenuView: View {
                 .opacity(0.65)
 
             optionButton("Quit Grove", role: .destructive) {
-                NSApplication.shared.terminate(nil)
+                if !settings.isPreview { NSApplication.shared.terminate(nil) }
             }
         }
     }
@@ -173,7 +181,7 @@ struct GroveMenuView: View {
         Button(role: role, action: action) {
             HStack {
                 Text(title)
-                    .font(.system(size: 14))
+                    .font(.system(size: 13))
                     .foregroundStyle(.primary)
                 Spacer()
             }
@@ -193,20 +201,22 @@ struct GroveMenuView: View {
     private func load() {
         guard !hasAppeared else { return }
         hasAppeared = true
-        showsDetails = !settings.hasCompletedWelcome
         agentManager.refresh()
     }
 }
 
 private struct GroveAgentSetupView: View {
     @ObservedObject var agentManager: GroveAgentManager
-    let onContinue: () -> Void
+    let isWelcome: Bool
+    var onContinue: (() -> Void)? = nil
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Welcome to Grove")
-                    .font(.system(size: 15, weight: .semibold))
+            VStack(alignment: .leading, spacing: isWelcome ? 4 : 0) {
+                if isWelcome {
+                    Text("Welcome to Grove")
+                        .font(.system(size: 15, weight: .semibold))
+                }
 
                 Text("Connect Grove to an installed agent.")
                     .font(.system(size: 12))
@@ -226,11 +236,19 @@ private struct GroveAgentSetupView: View {
                 }
             }
 
-            HStack {
-                Spacer()
-                Button("Continue", action: onContinue)
-                    .buttonStyle(.borderedProminent)
-                    .controlSize(.small)
+            if isWelcome, let onContinue {
+                HStack {
+                    Spacer()
+                    if #available(macOS 26.0, *) {
+                        Button("Continue", action: onContinue)
+                            .buttonStyle(.glassProminent)
+                            .controlSize(.small)
+                    } else {
+                        Button("Continue", action: onContinue)
+                            .buttonStyle(.borderedProminent)
+                            .controlSize(.small)
+                    }
+                }
             }
         }
     }
@@ -281,7 +299,7 @@ private struct ServiceRow: View {
                 ZStack {
                     Circle()
                         .fill(isEnabled
-                            ? Color(red: 0.96, green: 0.96, blue: 0.97)
+                            ? Color(nsColor: .controlBackgroundColor)
                             : Color(nsColor: .tertiarySystemFill))
 
                     Image(systemName: symbolName)
@@ -327,3 +345,43 @@ private struct ComingSoonTool: Identifiable {
         ComingSoonTool(title: "Contacts", symbolName: "person.2")
     ]
 }
+
+#if DEBUG
+private struct GroveMenuPreview: View {
+    @StateObject private var settings: GroveSettings
+    @StateObject private var updater = GroveUpdater(isPreview: true)
+    @StateObject private var agentManager = GroveAgentManager(isPreview: true)
+    let showsSettings: Bool
+
+    init(welcome: Bool = false, showsSettings: Bool = false) {
+        _settings = StateObject(wrappedValue: GroveSettings(previewWelcomeCompleted: !welcome))
+        self.showsSettings = showsSettings
+    }
+
+    var body: some View {
+        GroveMenuView(
+            settings: settings,
+            updater: updater,
+            agentManager: agentManager,
+            showsSettings: showsSettings
+        )
+        .background(.regularMaterial)
+    }
+}
+
+#Preview("Welcome", traits: .fixedLayout(width: 304, height: 300)) {
+    GroveMenuPreview(welcome: true)
+}
+
+#Preview("Main", traits: .fixedLayout(width: 304, height: 260)) {
+    GroveMenuPreview()
+}
+
+#Preview("Settings", traits: .fixedLayout(width: 304, height: 410)) {
+    GroveMenuPreview(showsSettings: true)
+}
+
+#Preview("Main — Dark", traits: .fixedLayout(width: 304, height: 260)) {
+    GroveMenuPreview().preferredColorScheme(.dark)
+}
+#endif

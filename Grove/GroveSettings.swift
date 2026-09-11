@@ -11,7 +11,16 @@ final class GroveSettings: ObservableObject {
 
     private let eventKitStore = EventKitStore()
 
-    init() {
+    let isPreview: Bool
+
+    init(previewWelcomeCompleted: Bool? = GroveLaunchMode.isPreview ? true : nil) {
+        isPreview = previewWelcomeCompleted != nil
+        if let previewWelcomeCompleted {
+            enabledServices = [.calendar]
+            launchAtLogin = false
+            hasCompletedWelcome = previewWelcomeCompleted
+            return
+        }
         enabledServices = GrovePreferences.enabledServices()
         launchAtLogin = SMAppService.mainApp.status == .enabled
         hasCompletedWelcome = GrovePreferences.hasCompletedWelcome()
@@ -22,11 +31,19 @@ final class GroveSettings: ObservableObject {
     }
 
     func setEnabled(_ enabled: Bool, for service: GroveService) {
+        if isPreview {
+            if enabled { enabledServices.insert(service) } else { enabledServices.remove(service) }
+            return
+        }
         GrovePreferences.setEnabled(enabled, for: service)
         enabledServices = GrovePreferences.enabledServices()
     }
 
     func toggle(_ service: GroveService) {
+        if isPreview {
+            setEnabled(!isEnabled(service), for: service)
+            return
+        }
         guard !authorizingServices.contains(service) else { return }
 
         if isEnabled(service) {
@@ -56,11 +73,15 @@ final class GroveSettings: ObservableObject {
     }
 
     func completeWelcome() {
-        GrovePreferences.setWelcomeCompleted(true)
+        if !isPreview { GrovePreferences.setWelcomeCompleted(true) }
         hasCompletedWelcome = true
     }
 
     func setLaunchAtLogin(_ enabled: Bool) {
+        if isPreview {
+            launchAtLogin = enabled
+            return
+        }
         do {
             if enabled {
                 try SMAppService.mainApp.register()

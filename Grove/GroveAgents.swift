@@ -18,7 +18,23 @@ final class GroveAgentManager: ObservableObject {
     @Published private(set) var busyAgentIDs: Set<String> = []
     @Published var errorMessage: String?
 
+    private let isPreview: Bool
+
+    init(isPreview: Bool = GroveLaunchMode.isPreview) {
+        self.isPreview = isPreview
+        if isPreview {
+            agents = AgentDefinition.all.map { definition in
+                GroveAgent(
+                    definition: definition,
+                    executableURL: definition.executableName.map { URL(fileURLWithPath: "/preview/" + $0) },
+                    mcpInstalled: definition.id == "codex"
+                )
+            }
+        }
+    }
+
     func refresh() {
+        guard !isPreview else { return }
         let detected = AgentDefinition.all.compactMap { definition -> GroveAgent? in
             guard definition.isInstalled else { return nil }
             return GroveAgent(
@@ -39,6 +55,12 @@ final class GroveAgentManager: ObservableObject {
     }
 
     func toggleMCP(for agent: GroveAgent) {
+        if isPreview {
+            if let index = agents.firstIndex(where: { $0.id == agent.id }) {
+                agents[index].mcpInstalled.toggle()
+            }
+            return
+        }
         guard agent.supportsMCPCommands, !isBusy(agent), let executableURL = agent.executableURL else { return }
 
         busyAgentIDs.insert(agent.id)
@@ -63,6 +85,7 @@ final class GroveAgentManager: ObservableObject {
     }
 
     func openREADME(for agent: GroveAgent) {
+        guard !isPreview else { return }
         NSWorkspace.shared.open(agent.manualURL)
     }
 
@@ -112,6 +135,7 @@ private struct AgentDefinition: Sendable {
 
     @MainActor
     var isInstalled: Bool {
+        if id == "other" { return true }
         if executableURL != nil { return true }
 
         let home = FileManager.default.homeDirectoryForCurrentUser.path
@@ -143,16 +167,6 @@ private struct AgentDefinition: Sendable {
             manualURL: GroveURLs.mcpSetup
         ),
         AgentDefinition(
-            id: "hermes",
-            title: "Hermes",
-            executableName: "hermes",
-            applicationPaths: [],
-            addArguments: nil,
-            removeArguments: nil,
-            statusArguments: nil,
-            manualURL: GroveURLs.mcpSetup
-        ),
-        AgentDefinition(
             id: "openclaw",
             title: "OpenClaw",
             executableName: "openclaw",
@@ -176,10 +190,10 @@ private struct AgentDefinition: Sendable {
             manualURL: GroveURLs.mcpSetup
         ),
         AgentDefinition(
-            id: "windsurf",
-            title: "Windsurf",
+            id: "other",
+            title: "Other",
             executableName: nil,
-            applicationPaths: ["/Applications/Windsurf.app", "~/Applications/Windsurf.app"],
+            applicationPaths: [],
             addArguments: nil,
             removeArguments: nil,
             statusArguments: nil,

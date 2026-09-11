@@ -17,7 +17,7 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleIconName</key>
-	<string>AppIcon</string>
+	<string>Grove</string>
 	<key>LSUIElement</key>
 	<true/>
 	<key>SUPublicEDKey</key>

@@ -25,10 +25,10 @@ final class GroveUpdater: NSObject, ObservableObject {
 
     #endif
 
-    override init() {
+    init(isPreview: Bool = GroveLaunchMode.isPreview) {
         super.init()
         #if canImport(Sparkle)
-        guard !GroveLaunchMode.isHeadless else { return }
+        guard !isPreview, !GroveLaunchMode.isHeadless else { return }
         let controller = SPUStandardUpdaterController(
             startingUpdater: true, updaterDelegate: self, userDriverDelegate: self
         )

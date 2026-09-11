@@ -3,6 +3,12 @@ import Darwin
 import SwiftUI
 
 enum GroveLaunchMode {
+    static var isPreview: Bool {
+        let environment = ProcessInfo.processInfo.environment
+        return environment["XCODE_RUNNING_FOR_PREVIEWS"] == "1"
+            || environment["XCODE_RUNNING_FOR_PLAYGROUNDS"] == "1"
+    }
+
     static var argument: String? {
         CommandLine.arguments.dropFirst().first
     }
@@ -17,6 +23,7 @@ final class GroveAppDelegate: NSObject, NSApplicationDelegate {
     private var mcpHTTPServer: GroveMCPHTTPServer?
 
     func applicationDidFinishLaunching(_ notification: Notification) {
+        guard !GroveLaunchMode.isPreview else { return }
         if GroveLaunchMode.isHeadless {
             NSApp.setActivationPolicy(.prohibited)
             Task { await runHeadlessCommand() }
@@ -29,6 +36,7 @@ final class GroveAppDelegate: NSObject, NSApplicationDelegate {
     }
 
     func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard !GroveLaunchMode.isPreview else { return .terminateNow }
         mcpHTTPServer?.stop()
         GroveProcessRegistry.terminateServers()
         return .terminateNow
@@ -92,5 +100,5 @@ struct GroveApp: App {
 }
 
 enum Grove {
-    static let version = "0.3.0"
+    static let version = "1.0.0"
 }
