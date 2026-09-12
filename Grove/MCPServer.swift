@@ -12,11 +12,39 @@ struct GroveServer {
         let lease = try GroveProcessLease()
         defer { _ = lease }
 
+        let server = await makeServer(listChanged: true)
+        let changes = DistributedNotificationCenter.default.addObserver(
+            forName: .groveServicesDidChange,
+            object: GrovePreferences.suiteName,
+            queue: nil
+        ) { _ in
+            Task {
+                try? await server.notify(ToolListChangedNotification.message())
+            }
+        }
+        defer { DistributedNotificationCenter.default.removeObserver(changes) }
+
+        try await server.start(transport: transport)
+        await server.waitUntilCompleted()
+    }
+
+    // Stateless HTTP requests must not share initialization state or request IDs.
+    // TODO: Use session transports if HTTP clients need pushed tool-list changes.
+    func handle(_ request: HTTPRequest) async throws -> HTTPResponse {
+        let transport = StatelessHTTPServerTransport()
+        let server = await makeServer(listChanged: false)
+        try await server.start(transport: transport)
+        let response = await transport.handleRequest(request)
+        await server.stop()
+        return response
+    }
+
+    private func makeServer(listChanged: Bool) async -> Server {
         let server = Server(
             name: "grove",
             version: Grove.version,
             title: "Grove",
-            capabilities: .init(tools: .init(listChanged: true))
+            capabilities: .init(tools: .init(listChanged: listChanged))
         )
 
         await server.withMethodHandler(ListTools.self) { _ in
@@ -45,19 +73,7 @@ struct GroveServer {
             }
         }
 
-        let changes = DistributedNotificationCenter.default.addObserver(
-            forName: .groveServicesDidChange,
-            object: GrovePreferences.suiteName,
-            queue: nil
-        ) { _ in
-            Task {
-                try? await server.notify(ToolListChangedNotification.message())
-            }
-        }
-        defer { DistributedNotificationCenter.default.removeObserver(changes) }
-
-        try await server.start(transport: transport)
-        await server.waitUntilCompleted()
+        return server
     }
 }
 

@@ -100,5 +100,5 @@ struct GroveApp: App {
 }
 
 enum Grove {
-    static let version = "1.0.0"
+    static let version = "1.0.1"
 }

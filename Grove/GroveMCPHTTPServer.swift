@@ -6,9 +6,8 @@ import Network
 final class GroveMCPHTTPServer {
     static let port: UInt16 = 52718
 
-    private let transport = StatelessHTTPServerTransport()
+    private let server = GroveServer(store: EventKitStore())
     private var listener: NWListener?
-    private var serverTask: Task<Void, Never>?
 
     var endpoint: URL {
         URL(string: "http://127.0.0.1:\(Self.port)/mcp")!
@@ -35,20 +34,13 @@ final class GroveMCPHTTPServer {
                 }
             }
 
-            let transport = transport
+            let server = server
             listener.newConnectionHandler = { connection in
-                GroveHTTPConnection(connection: connection, transport: transport).start()
+                GroveHTTPConnection(connection: connection, server: server).start()
             }
             listener.start(queue: DispatchQueue(label: "com.thsnkhn.grove.mcp-http"))
             self.listener = listener
 
-            serverTask = Task { [transport] in
-                do {
-                    try await GroveServer(store: EventKitStore()).run(transport: transport)
-                } catch {
-                    fputs("Grove: MCP server stopped: \(error.localizedDescription)\n", stderr)
-                }
-            }
         } catch {
             fputs("Grove: could not start MCP listener: \(error.localizedDescription)\n", stderr)
         }
@@ -57,13 +49,6 @@ final class GroveMCPHTTPServer {
     func stop() {
         listener?.cancel()
         listener = nil
-        serverTask?.cancel()
-        serverTask = nil
-
-        let transport = transport
-        Task {
-            await transport.disconnect()
-        }
     }
 }
 
@@ -71,12 +56,12 @@ private final class GroveHTTPConnection: @unchecked Sendable {
     private static let maxRequestSize = 4 * 1024 * 1024
 
     private let connection: NWConnection
-    private let transport: StatelessHTTPServerTransport
+    private let server: GroveServer
     private var buffer = Data()
 
-    init(connection: NWConnection, transport: StatelessHTTPServerTransport) {
+    init(connection: NWConnection, server: GroveServer) {
         self.connection = connection
-        self.transport = transport
+        self.server = server
     }
 
     func start() {
@@ -89,7 +74,7 @@ private final class GroveHTTPConnection: @unchecked Sendable {
 
         do {
             guard let request = try await readRequest() else { return }
-            let response = await transport.handleRequest(request)
+            let response = try await server.handle(request)
             try await send(response)
         } catch {
             return

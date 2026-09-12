@@ -1,6 +1,39 @@
 import Foundation
+import MCP
 import Testing
 @testable import Grove
+
+@Test @MainActor
+func httpClientsCanInitializeIndependently() async throws {
+    let server = GroveServer(store: EventKitStore())
+    let request = HTTPRequest(
+        method: "POST",
+        headers: ["Content-Type": "application/json", "Accept": "application/json"],
+        body: Data(#"{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-03-26","capabilities":{},"clientInfo":{"name":"test","version":"1"}}}"#.utf8),
+        path: "/mcp"
+    )
+    for _ in 0..<2 {
+        let response = try await server.handle(request)
+        #expect(response.statusCode == 200)
+        let data = try #require(response.bodyData)
+        let json = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        #expect(json["error"] == nil)
+        #expect(json["result"] != nil)
+    }
+    let listRequest = HTTPRequest(
+        method: "POST",
+        headers: ["Content-Type": "application/json", "Accept": "application/json"],
+        body: Data(#"{"jsonrpc":"2.0","id":1,"method":"tools/list"}"#.utf8),
+        path: "/mcp"
+    )
+    async let initialize = server.handle(request)
+    async let list = server.handle(listRequest)
+    let (initializeResponse, listResponse) = try await (initialize, list)
+    let initializeData = try #require(initializeResponse.bodyData)
+    let listData = try #require(listResponse.bodyData)
+    #expect(String(decoding: initializeData, as: UTF8.self).contains("serverInfo"))
+    #expect(String(decoding: listData, as: UTF8.self).contains("tools"))
+}
 
 @Test
 func parsesDateOnlyAndTimedValues() throws {

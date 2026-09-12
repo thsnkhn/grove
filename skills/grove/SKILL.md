@@ -10,7 +10,9 @@ Use Grove for requests that involve the user's Apple Calendar or Reminders.
 ## Before using tools
 
 - Use Calendar tools for scheduled events and Reminders tools for tasks.
-- If a Grove tool is unavailable, tell the user to enable that service in the Grove menu bar app.
+- If a Grove tool is unavailable, check the MCP connection and enabled services before asking the user to change settings.
+- A sandbox can block localhost requests. Repeat a failed connection check with approved network access before reporting that Grove is offline.
+- An HTTP 405 response to GET confirms only that the endpoint responds. Check an MCP initialize request and a read tool to confirm access.
 - Use list tools to resolve calendar, list, event, or reminder identifiers. Do not guess identifiers.
 - Use `YYYY-MM-DD` for date-only values. Use ISO 8601 with a time-zone offset for timed values.
 - Calendar range end dates and reminder `dueTo` values are exclusive.
@@ -29,4 +31,3 @@ Use Grove for requests that involve the user's Apple Calendar or Reminders.
 - Use either a recurrence end date or an occurrence count.
 - Alarm offsets use minutes relative to the event start or reminder due date. Negative values occur before it.
 - Reminder priority is `0` for none and `1` through `9` for increasing priority.
-
